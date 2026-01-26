@@ -1,0 +1,2515 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta name="description" content="S7 Várzea League: O melhor jogo de Manager de Futebol Amador. Crie seu time, gerencie finanças, suba de divisão e desafie seus amigos. Jogue grátis agora!">
+<meta name="keywords" content="futebol manager, jogo de futebol, várzea, s7 league, jogo grátis, browser game, futebol online, cartola">
+<meta name="author" content="S7 Games - Arthur">
+
+<meta property="og:title" content="S7 Várzea League - Vire Técnico!">
+<meta property="og:description" content="Assuma um time da várzea, assine com o Bar do Zé e chegue à Elite. Tem coragem?">
+<meta property="og:type" content="website">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#000000">
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js');
+  }
+</script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>S7 Várzea League</title>
+<style>
+    /* --- ESTILOS GERAIS --- */
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, sans-serif; user-select: none; -webkit-tap-highlight-color: transparent; }
+    :root {
+    /* -- AS CORES NOVAS (Estilo Gamer/Dark) -- */
+    --fundo-geral: #121212;       /* Preto fosco */
+    --fundo-card: #1E1E1E;        /* Cinza chumbo */
+    --texto-principal: #E0E0E0;   /* Branco gelo */
+    --verde-grana: #00C853;       /* Verde Dinheiro */
+    --amarelo-alerta: #FFD600;    /* Amarelo Aviso */
+}
+
+body {
+    background-color: var(--fundo-geral); /* Troca o fundo branco pelo preto */
+    color: var(--texto-principal);        /* Troca letra preta por branca */
+    font-family: sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+    /* ANIMAÇÕES */
+    @keyframes goalPulse { 0% { transform: scale(1); color: white; } 50% { transform: scale(1.5); color: #2ecc71; text-shadow: 0 0 20px #2ecc71; } 100% { transform: scale(1); color: white; } }
+    .gol-anim { animation: goalPulse 1s ease-out; }
+    @keyframes confetti { 0% { transform: translateY(0) rotate(0deg); opacity: 1; } 100% { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
+    .confete { position: absolute; width: 10px; height: 10px; background: gold; animation: confetti 3s linear infinite; }
+    @keyframes popIn { 0% { transform: scale(0); opacity: 0; } 80% { transform: scale(1.1); opacity: 1; } 100% { transform: scale(1); } }
+
+    /* TELAS */
+    .tela { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: none; flex-direction: column; align-items: center; justify-content: flex-start; background: #121212; overflow-y: auto; z-index: 10; padding-bottom: 20px; }
+    
+    /* BOTOES E UI */
+    .btn-gold { background: #f1c40f; color: #121212; font-weight: bold; border: none; padding: 15px; width: 100%; border-radius: 8px; font-size: 16px; margin-top: 15px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 0 #c0392b; }
+    .btn-gold:active { transform: translateY(4px); box-shadow: none; }
+    .btn-back { background: none; border: none; color: #f1c40f; font-weight: bold; font-size: 16px; padding: 10px; cursor: pointer; }
+    .btn-action { background: #2c2c2c; border: 1px solid #444; color: white; padding: 8px 20px; border-radius: 20px; font-size: 12px; font-weight: bold; cursor: pointer; }
+    .top-bar { width: 100%; padding: 15px; background: #1f1f1f; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #333; position: sticky; top: 0; z-index: 50; box-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+    
+    /* TELA INICIAL */
+    #t-inicio { display: flex; justify-content: center; background: radial-gradient(circle at center, #2c3e50, #000000); z-index: 100; }
+    .titulo-game { font-size: 45px; color: #f1c40f; text-align: center; margin-top: 30vh; font-weight: 900; text-shadow: 0 0 20px rgba(241, 196, 15, 0.4); line-height: 1; }
+    .btn-start { margin-top: 60px; border: 2px solid #f1c40f; color: #f1c40f; padding: 15px 50px; border-radius: 50px; font-weight: bold; font-size: 18px; cursor: pointer; background: rgba(0,0,0,0.5); transition: 0.3s; }
+
+    /* CRIAÇÃO */
+    .grid-paises { width: 90%; margin-top: 20px; padding-bottom: 50px; }
+    .card-pais { background: #252525; padding: 20px; border-radius: 12px; border: 1px solid #333; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: 0.2s; }
+    .card-pais:active { background: #f1c40f; color: black; border-color: #f1c40f; transform: scale(0.98); }
+    .box-login { width: 90%; background: #1f1f1f; padding: 25px; border-radius: 15px; text-align: center; margin-top: 50px; border: 1px solid #333; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+    input { width: 100%; padding: 15px; margin: 10px 0; background: #2c2c2c; border: 1px solid #444; color: white; text-align: center; font-size: 16px; border-radius: 8px; outline: none; }
+    
+    /* EDITOR */
+    .preview-area { background: #1a1a1a; width: 100%; display: flex; flex-direction: column; align-items: center; padding: 20px 0; border-bottom: 1px solid #333; position: sticky; top: 0; z-index: 20; }
+    .big-shield { width: 130px; height: 130px; border: 4px solid #fff; background-color: #333; margin-bottom: 15px; box-shadow: 0 0 20px rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; font-size: 70px; text-shadow: 2px 2px 0px rgba(0,0,0,0.3); transition: 0.3s; }
+    .color-pickers { display: flex; gap: 15px; width: 90%; justify-content: center; margin-bottom: 15px; }
+    .cp-wrapper { width: 48%; text-align: center; }
+    input[type="color"] { height: 45px; padding: 0; border: 2px solid #444; width: 100%; cursor: pointer; border-radius: 5px; }
+    .logo-scroll { display: flex; gap: 10px; overflow-x: auto; width: 95%; padding: 10px; background: #252525; border-radius: 10px; margin-bottom: 15px; border: 1px solid #333; }
+    .btn-logo { width: 50px; height: 50px; flex-shrink: 0; background: #333; border: 2px solid #444; border-radius: 8px; display: flex; justify-content: center; align-items: center; font-size: 24px; cursor: pointer; transition: 0.2s; }
+    .btn-logo.selected { border-color: #f1c40f; background: #444; transform: scale(1.1); }
+    .grid-escudos { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; width: 90%; margin-top: 10px; padding-bottom: 100px; }
+    .btn-style { aspect-ratio: 1; border-radius: 50%; border: 2px solid #333; background: #222; cursor: pointer; }
+    .btn-style.selected { border-color: #f1c40f; box-shadow: 0 0 15px rgba(241, 196, 15, 0.4); transform: scale(1.1); }
+    
+    .shape-selector { display: flex; gap: 8px; justify-content: center; margin-bottom: 15px; width: 95%; overflow-x: auto; padding: 5px; }
+    .btn-shape { width: 45px; height: 45px; background: #444; border: 2px solid #555; cursor: pointer; flex-shrink: 0; transition: 0.2s; }
+    .btn-shape:active { transform: scale(0.9); }
+    .btn-shape.selected { background: #f1c40f; border-color: white; }
+
+    .fixed-btn-area { position: fixed; bottom: 0; width: 100%; padding: 15px; background: #121212; z-index: 999; border-top: 1px solid #333; }
+
+    /* HOME & FINANÇAS */
+    .header-home { width: 100%; background: #1f1f1f; padding: 20px; display: flex; flex-direction: column; align-items: center; border-bottom: 2px solid #f1c40f; position: relative; }
+    .home-flag { width: 85px; height: 85px; border: 3px solid white; background: #333; margin-bottom: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; font-size: 40px; }
+    .money-badge { color: #2ecc71; font-weight: bold; font-size: 16px; background: rgba(46, 204, 113, 0.15); padding: 5px 15px; border-radius: 20px; border: 1px solid #2ecc71; margin-top: 5px; }
+    .finance-ctrl { width: 95%; background: #252525; padding: 15px; border-radius: 12px; border: 1px solid #333; margin-top: 15px; }
+    .slider-container { margin-top: 10px; }
+    input[type=range] { width: 100%; background: #333; height: 8px; border-radius: 4px; border: none; }
+    .cycle-bar { width: 100%; height: 6px; background: #444; border-radius: 3px; margin-top: 5px; overflow: hidden; }
+    .cycle-fill { height: 100%; background: #f1c40f; width: 25%; transition: 0.3s; }
+    .match-card { width: 95%; background: linear-gradient(145deg, #252525, #1e1e1e); border-radius: 12px; padding: 20px; margin-top: 20px; border: 1px solid #444; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+    .match-vs { display: flex; justify-content: space-around; align-items: center; font-size: 26px; font-weight: bold; }
+    .ovr-badge { font-size: 13px; background: #333; padding: 2px 10px; border-radius: 4px; color: #ccc; border: 1px solid #555; margin-top: 5px; display: inline-block; font-weight: normal; }
+    .info-card { width: 95%; background: #1f1f1f; border-radius: 12px; padding: 15px; margin-top: 15px; border: 1px solid #333; }
+    .info-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #2c2c2c; font-size: 14px; color: #ddd; }
+    
+    /* PATROCINIOS & ESTADIO */
+    .bill-box { background:#2c0e0e; border:1px solid #e74c3c; padding:15px; border-radius:8px; margin-bottom:20px; }
+    .card-patro { background: #252525; padding: 15px; margin-bottom: 12px; border-radius: 10px; border: 1px solid #333; border-left: 5px solid #555; position: relative; }
+    .tier-bronze { border-left-color: #cd7f32; } .tier-prata { border-left-color: #bdc3c7; } .tier-master { border-left-color: #9b59b6; background: linear-gradient(90deg, #252525, #2c0e38); }
+    .val-green { color: #2ecc71; font-weight: bold; } .val-red { color: #e74c3c; font-weight: bold; }
+    .stadium-box { background: #1a2639; border: 1px solid #2980b9; padding: 15px; border-radius: 10px; margin-bottom: 20px; text-align: center; }
+    
+    /* MENU PRINCIPAL */
+    .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 95%; margin: 20px auto; padding-bottom: 50px; }
+    .menu-btn { background: #252525; height: 110px; border-radius: 12px; border: 1px solid #333; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: 0.1s; }
+    .menu-btn:active { background: #f1c40f; color: black; border-color: #f1c40f; transform: scale(0.98); }
+
+    /* CARD MERCADO */
+    .market-card { background: #222; padding: 10px; border-radius: 8px; border: 1px solid #444; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid #555; }
+    .market-stats { font-size: 11px; color: #aaa; margin-top: 4px; }
+    .ovr-box-market { width: 35px; height: 35px; background: #333; color: #f1c40f; display:flex; justify-content:center; align-items:center; border-radius: 5px; font-weight: 900; font-size: 16px; border: 2px solid #555; margin-right: 12px; }
+    .pot-badge { font-size:10px; padding:2px 6px; border-radius:4px; margin-left:5px; font-weight:bold; }
+    .pot-high { background:#2ecc71; color:black; }
+    .pot-med { background:#f1c40f; color:black; }
+    .pot-low { background:#e74c3c; color:white; }
+
+    /* TREINO CARD */
+    .treino-btn { display: flex; justify-content: space-between; align-items: center; background: #333; padding: 15px; margin-bottom: 8px; border-radius: 8px; cursor: pointer; border: 1px solid #444; }
+    .treino-btn:active { background: #444; border-color: #f1c40f; }
+
+    /* ELENCO & LIGA */
+    .list-container { width: 100%; padding: 15px; padding-bottom: 80px; }
+    .p-card { margin-bottom: 10px; padding: 12px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border-left: 5px solid #555; position: relative; cursor: pointer; transition: transform 0.2s; }
+    .card-bronze { background: linear-gradient(145deg, #3e2723, #252525); border-left-color: #8d6e63; } 
+    .card-silver { background: linear-gradient(145deg, #455a64, #252525); border-left-color: #cfd8dc; border: 1px solid #90a4ae; } 
+    .card-gold { background: linear-gradient(145deg, #5D4037, #252525); border-left-color: #FFD700; border: 2px solid #FFD700; box-shadow: 0 0 10px rgba(255, 215, 0, 0.4); } 
+    .p-card.selected { border: 3px solid #00e676 !important; background: #1b5e20; transform: scale(1.02); z-index: 100; box-shadow: 0 0 15px rgba(0, 230, 118, 0.5); }
+    .stamina-container { width: 100%; height: 4px; background: #222; margin-top: 8px; border-radius: 2px; }
+    .stamina-fill { height: 100%; width: 100%; background: #2ecc71; border-radius: 2px; transition: width 0.5s; }
+    .table-wrapper { width: 100%; overflow-x: auto; padding-bottom: 50px; margin-top: 10px; }
+    table { width: 100%; border-collapse: collapse; min-width: 350px; }
+    th { background: #252525; color: #aaa; padding: 12px; font-size: 11px; text-align: center; position: sticky; top: 0; }
+    td { padding: 12px; border-bottom: 1px solid #222; font-size: 14px; text-align: center; }
+    .row-player { background: rgba(241, 196, 15, 0.1); border-left: 3px solid #f1c40f; }
+
+    /* JOGO */
+    #modal-jogo { z-index: 200; background: #000; }
+    .placar-live { background: linear-gradient(180deg, #1f1f1f, #121212); padding: 25px; text-align: center; border-bottom: 2px solid #333; position: sticky; top: 0; z-index: 10; }
+    .score-box { font-size: 50px; font-weight: 900; display: flex; justify-content: center; gap: 30px; align-items: center; color: white; text-shadow: 0 0 10px rgba(0,0,0,0.5); transition: transform 0.2s; }
+    .game-controls { display: flex; justify-content: center; gap: 15px; padding: 15px; background: #121212; border-bottom: 1px solid #222; }
+    .btn-ctrl { background: #2c2c2c; color: white; padding: 10px 25px; border-radius: 8px; font-size: 13px; border: 1px solid #444; cursor: pointer; text-transform: uppercase; font-weight: bold; }
+    .narracao-area { flex: 1; padding: 15px; overflow-y: auto; background: #000; display: flex; flex-direction: column; gap: 10px; }
+    .msg-narracao { font-size: 14px; color: #bbb; border-left: 3px solid #444; padding-left: 12px; line-height: 1.4; animation: fadeIn 0.3s; }
+    .msg-gol { font-weight: 900; font-size: 20px; text-transform: uppercase; color: #f1c40f !important; border-left: 5px solid #f1c40f; padding: 10px; background: rgba(241, 196, 15, 0.1); margin: 5px 0; border: 1px solid #f1c40f; }
+
+    /* MODAIS */
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 250; display: none; flex-direction: column; justify-content: center; align-items: center; backdrop-filter: blur(5px); }
+    .detalhes-card { width: 90%; background: #1f1f1f; padding: 25px; border-radius: 15px; border: 1px solid #444; max-height: 80%; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+    .rodada-item { background: #2c2c2c; padding: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; border-radius: 8px; font-size: 14px; border: 1px solid #333; }
+    .relatorio-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #333; font-size: 14px; color: #ddd; }
+
+    /* MODAL EVENTO (NOVO) */
+    #modal-evento .detalhes-card { border: 2px solid #9b59b6; box-shadow: 0 0 20px rgba(155, 89, 182, 0.5); animation: popIn 0.3s; }
+    .evt-btn { width: 100%; padding: 15px; margin-top: 10px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; text-align: left; transition: 0.2s; }
+    .evt-btn:hover { filter: brightness(1.2); }
+
+    /* MENU E CONFIG */
+    .btn-kebab { position: absolute; top: 15px; right: 15px; font-size: 30px; color: white; cursor: pointer; z-index: 60; line-height: 20px; padding: 10px; }
+    .dropdown-container { display: none; position: absolute; top: 60px; right: 15px; background-color: #252525; min-width: 160px; box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.5); z-index: 200; border-radius: 8px; border: 1px solid #444; flex-direction: column; }
+    .dropdown-item { padding: 15px; color: white; text-decoration: none; display: block; font-size: 14px; border-bottom: 1px solid #333; cursor: pointer; }
+    .switch-container { display: flex; justify-content: space-between; align-items: center; background: #252525; padding: 20px; border-radius: 12px; margin-bottom: 20px; cursor: pointer; border: 1px solid #333; }
+    .btn-config { background: #252525; color: white; border: 1px solid #444; padding: 18px; width: 100%; margin-bottom: 12px; border-radius: 10px; text-align: left; cursor: pointer; transition: 0.2s; font-size: 15px; }
+    .btn-config.active { border-color: #f1c40f; color: #f1c40f; background: #1a1a1a; font-weight: bold; }
+    
+    /* GESTAO TIME BUTTONS */
+    .btn-gestao { background: #333; padding: 20px; border-radius: 10px; width: 100%; text-align: center; border: 1px solid #444; margin-bottom: 10px; cursor: pointer; }
+    .btn-gestao:hover { background: #444; border-color: #f1c40f; }
+    .btn-gestao span { font-size: 30px; display: block; margin-bottom: 5px; }
+
+/* Estilo da Barra de Topo */
+header {
+    background-color: var(--fundo-card);
+    padding: 15px 20px;
+    border-bottom: 1px solid #333;
+    display: flex;
+    justify-content: space-between; /* Separa nome do dinheiro */
+    align-items: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5); /* Sombra embaixo */
+}
+
+.nome-time {
+    font-size: 18px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.saldo-dinheiro {
+    background-color: #2E7D32; /* Fundo verde escuro */
+    color: #fff;
+    padding: 5px 15px;
+    border-radius: 20px; /* Borda redonda */
+    border: 1px solid var(--verde-grana);
+    font-weight: bold;
+    box-shadow: 0 0 10px rgba(0, 200, 83, 0.4); /* Brilho neon verde */
+}
+</style>
+</head>
+<body>
+
+<audio id="sfx-apito" src="sons/apito.mp3" preload="auto"></audio>
+<audio id="sfx-gol" src="sons/gol.mp3" preload="auto"></audio>
+<audio id="sfx-torcida" src="sons/torcida.mp3" preload="auto"></audio>
+<audio id="musicaFundo" src="sons/fundo.mp3" loop></audio>
+
+    <div id="t-inicio" class="tela" style="display: flex;">
+<div class="titulo-game">
+    S7 VÁRZEA LEAGUE<br>
+    <small style="font-size:16px; color:#aaa; font-weight:normal;">DA VÁRZEA AO TOPO</small>
+</div>
+
+        <div class="btn-start" onclick="irParaPais()">JOGAR</div>
+    </div>
+
+    <div id="t-pais" class="tela">
+        <h2 style="color:#f1c40f; margin-top:20px;">ESCOLHA O PAÍS</h2>
+        <div class="grid-paises">
+            <div class="card-pais" onclick="selectCountry('Brasil', 'Várzea Regional')"><span>🇧🇷 Brasil</span><small>Várzea</small></div>
+            <div class="card-pais" onclick="selectCountry('Argentina', 'Liga Potrero')"><span>🇦🇷 Argentina</span><small>Potrero</small></div>
+            <div class="card-pais" onclick="selectCountry('Inglaterra', 'Sunday League')"><span>🏴󠁧󠁢󠁥󠁮󠁧󠁿 Inglaterra</span><small>Sunday</small></div>
+        </div>
+    </div>
+
+    <div id="t-login" class="tela">
+        <div class="box-login">
+            <h2 style="color:#f1c40f;">CRIAR CLUBE</h2>
+            <p id="lbl-liga-start" style="color:#aaa; font-size:12px; margin-bottom:10px;">...</p>
+            <input type="text" id="inp-nome" placeholder="Seu Nome (Técnico)" maxlength="15">
+            <input type="text" id="inp-time" placeholder="Nome do Time" maxlength="15">
+            <input type="text" id="inp-estadio" placeholder="Nome do Estádio" maxlength="15">
+            <button class="btn-gold" onclick="irParaBandeira()">AVANÇAR</button>
+        </div>
+    </div>
+
+    <div id="t-bandeira" class="tela">
+        <div class="preview-area">
+            <h3 style="color:#aaa; font-size:14px; margin-bottom:10px;">EDITOR DE ESCUDO</h3>
+            <div id="flag-main" class="big-shield"></div>
+            
+            <div style="color:#aaa; font-size:12px; margin-bottom:5px;">FORMATO DO ESCUDO</div>
+            <div class="shape-selector">
+                <div class="btn-shape selected" style="border-radius:50%;" onclick="setShape('50%', this)"></div>
+                <div class="btn-shape" style="border-radius: 0 0 50px 50px;" onclick="setShape('0 0 50px 50px', this)"></div> 
+                <div class="btn-shape" style="border-radius: 8px;" onclick="setShape('8px', this)"></div> 
+                <div class="btn-shape" style="border-radius: 10px 40px 10px 40px;" onclick="setShape('10px 40px 10px 40px', this)"></div> 
+                <div class="btn-shape" style="border-radius: 5px 5px 50px 50px;" onclick="setShape('5px 5px 50px 50px', this)"></div> 
+                <div class="btn-shape" style="border-radius: 20px 0 20px 0;" onclick="setShape('20px 0 20px 0', this)"></div> 
+            </div>
+
+            <div class="color-pickers">
+                <div class="cp-wrapper"><small>Cor 1</small><input type="color" id="cor1" value="#ffffff" onchange="updateFlag()"></div>
+                <div class="cp-wrapper"><small>Cor 2</small><input type="color" id="cor2" value="#000000" onchange="updateFlag()"></div>
+            </div>
+            <div style="width:90%; margin-top:5px;">
+                <small style="color:#aaa;">SÍMBOLO (LOGO)</small>
+                <div class="logo-scroll" id="logo-list"></div>
+            </div>
+        </div>
+        <div class="grid-escudos" id="grid-styles"></div>
+        <div class="fixed-btn-area">
+            <button class="btn-gold" style="margin:0;" onclick="finalizarCriacao()">CRIAR TIME</button>
+        </div>
+    </div>
+
+    <div id="t-home" class="tela" onclick="fecharMenuSeAberto(event)">
+        <div class="header-home">
+            <div class="btn-kebab" onclick="toggleMenu(event)">⋮</div>
+            <div id="menu-dropdown" class="dropdown-container">
+                <div class="dropdown-item" onclick="abrirMenuGestao()">👥 Gestão (Elenco/Treino)</div>
+                <div class="dropdown-item" onclick="abrirCalendario()">📅 Calendário</div>
+                <div class="dropdown-item" onclick="nav('t-home','t-ajustes')">⚙️ Configurações</div>
+                <div class="dropdown-item" onclick="salvarJogoAuto(); alert('Jogo Salvo!');">💾 Salvar Jogo</div>
+                <div class="dropdown-item" style="color:#e74c3c" onclick="location.reload()">❌ Sair</div>
+            </div>
+            <div id="header-flag" class="home-flag"></div>
+            <div id="txt-team-name" class="team-title">TIME</div>
+            <div class="money-badge" id="lbl-dinheiro">R$ 20.000</div>
+        </div>
+
+        <div class="match-card">
+            <div class="match-header">PRÓXIMO JOGO - RODADA <span id="rodada-atual">1</span> <br> <span id="lbl-fase" style="font-weight:normal; color:#f1c40f;">Fase de Grupos</span></div>
+            <div class="match-vs">
+                <div style="width:40%"><span id="home-name">EU</span> <div class="ovr-badge" id="home-ovr">--</div></div>
+                <span>X</span>
+                <div style="width:40%"><span id="away-name">CPU</span> <div class="ovr-badge" id="away-ovr">--</div></div>
+            </div>
+        </div>
+
+        <div class="finance-ctrl">
+            <div style="display:flex; justify-content:space-between; font-size:12px; color:#aaa; margin-bottom:5px;">
+                <span>Preço Ingresso: <b id="lbl-preco" style="color:#2ecc71">R$ 30</b></span>
+                <span>Ciclo Pag.: <b id="lbl-ciclo">1</b>/4</span>
+            </div>
+            <div class="slider-container"><input type="range" id="rng-preco" min="5" max="150" value="30" oninput="atualizarLabelPreco()"></div>
+            <div id="dica-preco" class="dica-text" style="font-size:11px; text-align:center; color:#aaa; margin-top:5px;"></div>
+            <div class="cycle-bar"><div class="cycle-fill" id="bar-salario"></div></div>
+            <div id="alert-pagamento" style="display:none; text-align:center; color:#e74c3c; font-weight:bold; font-size:11px; margin-top:5px;">⚠️ PAGAMENTO DE SALÁRIOS HOJE!</div>
+        </div>
+
+        <div class="info-card">
+            <div class="info-row"><span>País:</span> <span id="info-pais" style="color:#f1c40f">...</span></div>
+            <div class="info-row"><span>Liga:</span> <span id="info-liga">...</span></div>
+            <div class="info-row"><span>Técnico:</span> <span id="info-tecnico">...</span></div>
+            <div class="info-row"><span>Torcida:</span> <span id="info-torcida" style="color:#aaa">...</span></div>
+            <div class="info-row"><span>Reputação:</span> <span id="info-reputacao" style="color:#aaa">...</span></div>
+            <div class="info-row"><span>Estádio:</span> <span id="info-estadio" style="color:#aaa">...</span></div>
+            <div class="info-row"><span>Capacidade:</span> <span id="info-capacidade" style="color:#2ecc71; font-weight:bold;">1000</span></div>
+        </div>
+
+        <div class="menu-grid">
+            <div class="menu-btn" onclick="abrirElenco(false)"><div style="font-size:30px;">👕</div><div style="font-weight:bold; margin-top:5px;">ELENCO</div></div>
+            <div class="menu-btn" onclick="abrirSelecionarJogadorParaTreino()"><div style="font-size:30px;">💪</div><div style="font-weight:bold; margin-top:5px;">TREINO</div></div>
+            
+            <div class="menu-btn" onclick="abrirMercado()"><div style="font-size:30px;">🛒</div><div style="font-weight:bold; margin-top:5px;">MERCADO</div></div>
+            <div class="menu-btn" onclick="nav('t-home','t-liga')"><div style="font-size:30px;">🏆</div><div style="font-weight:bold; margin-top:5px;">TABELA</div></div>
+            <div class="menu-btn" onclick="abrirFinancas()"><div style="font-size:30px;">💰</div><div style="font-weight:bold; margin-top:5px;">CLUBE</div></div>
+            <div class="menu-btn" onclick="iniciarJogo()" style="background: #f1c40f; color: black; border-color:white;"><div style="font-size:30px;">⚽</div><div style="font-weight:bold; margin-top:5px;">JOGAR</div></div>
+        </div>
+    </div>
+
+    <div id="t-mercado" class="tela">
+        <div class="top-bar"><button class="btn-back" onclick="nav('t-mercado', 't-home')">❮ VOLTAR</button><span>MERCADO (4 RODADAS)</span></div>
+        <div style="width:100%; padding:15px; padding-bottom:80px;">
+            <div id="aviso-mercado" style="text-align:center; color:#aaa; font-size:12px; margin-bottom:10px;"></div>
+            <div id="lista-mercado"></div>
+        </div>
+    </div>
+
+    <div id="t-financas" class="tela">
+        <div class="top-bar"><button class="btn-back" onclick="nav('t-financas', 't-home')">❮ VOLTAR</button><span>CLUBE & FINANÇAS</span></div>
+        <div style="width:95%; margin-top:20px;">
+            <div class="stadium-box">
+                <h3 style="color:white; margin-bottom:5px;">ESTÁDIO</h3>
+                <div style="font-size:12px; color:#aaa; margin-bottom:10px;">Aumente a capacidade para lucrar mais!</div>
+                <div style="font-size:30px; font-weight:bold; color:#2ecc71; margin-bottom:10px;" id="fin-capacidade">1.000</div>
+                <button class="btn-action" style="background:#2980b9; width:100%; padding:12px;" onclick="evoluirEstadio()">EVOLUIR (+500 Lugares) - R$ <span id="custo-estadio">15000</span></button>
+            </div>
+
+            <div class="bill-box">
+                <div style="color:#aaa; font-size:12px;">PRÓXIMA FATURA (4º Jogo)</div>
+                <div style="color:#e74c3c; font-size:24px; font-weight:bold;" id="fin-fatura">- R$ 0</div>
+                <div style="font-size:11px; color:#e74c3c;">Salários + Manutenção Patrocínio</div>
+            </div>
+            <h3 style="color:#f1c40f; margin-bottom:10px; text-align:center;">PATROCINADORES</h3>
+            <div id="lista-patrocinios"></div>
+        </div>
+    </div>
+
+    <div id="t-calendario" class="tela">
+        <div class="top-bar">
+            <button class="btn-back" onclick="nav('t-calendario','t-home')">❮ VOLTAR</button><span>CALENDÁRIO</span><div style="width:50px;"></div> 
+        </div>
+        <div style="width:100%; padding:15px; background:#1f1f1f; text-align:center; position:sticky; top:60px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <button class="btn-action" onclick="mudarRodadaCal(-1)">❮ ANTERIOR</button>
+                <span style="font-weight:bold; font-size:18px; color:#f1c40f;" id="cal-rodada-titulo">RODADA 1</span>
+                <button class="btn-action" onclick="mudarRodadaCal(1)">PRÓXIMA ❯</button>
+            </div>
+        </div>
+        <div id="lista-calendario" class="list-container" style="padding-top:10px;"></div>
+    </div>
+
+    <div id="t-elenco" class="tela">
+        <div class="top-bar">
+            <button class="btn-back" onclick="fecharElenco()">❮ VOLTAR</button><span style="font-weight:bold;">ESCALAÇÃO</span>
+            <div style="position: absolute; right: 10px; top: 15px; display: flex; gap: 5px;">
+                <button class="btn-action" onclick="abrirBase()" style="padding: 5px 10px; background: #333; border-color: #555;">👶 BASE</button>
+                <button class="btn-action" onclick="autoEscalar()" style="padding: 5px 10px; background: #9b59b6; border-color: #8e44ad;">⚡ AUTO</button>
+            </div>
+            
+            <div style="text-align:right; margin-top:35px;">
+                <select id="sel-formacao" onchange="mudarFormacao()" style="background:#333; color:white; border:none; font-size:12px; margin-top:2px;"><option value="4-4-2">4-4-2 (Normal)</option><option value="4-3-3">4-3-3 (Ataque)</option><option value="5-4-1">5-4-1 (Retranca)</option></select>
+                <div style="font-size:14px; font-weight:bold; color:#2ecc71; margin-top:2px;" id="lbl-team-strength">Força: 00</div>
+                <span style="font-size:10px; color:#aaa; display:block;" id="lbl-subs">0/5</span>
+            </div>
+        </div>
+        <div class="list-container" id="lista-jogadores" style="margin-top:20px;"></div>
+    </div>
+
+    <div id="t-liga" class="tela">
+        <div class="top-bar"><button class="btn-back" onclick="nav('t-liga','t-home')">❮ VOLTAR</button><button class="btn-action" onclick="verRodada(false)">JOGOS</button></div>
+        <div class="table-wrapper">
+            <table><thead><tr><th>#</th><th style="text-align:left;">TIME</th><th>P</th><th>V</th><th>SG</th><th>GP</th></tr></thead><tbody id="corpo-tabela"></tbody></table>
+        </div>
+    </div>
+
+    <div id="t-ajustes" class="tela">
+        <div class="top-bar"><button class="btn-back" onclick="nav('t-ajustes', 't-home')">❮ VOLTAR</button><span>CONFIGURAÇÕES</span></div>
+        <div class="config-box" style="width:90%; margin-top:20px;">
+            <div style="background:#252525; padding:15px; border-radius:10px; border:1px solid #444; margin-bottom:15px;">
+    <p style="color:#f1c40f; font-size:12px; margin-bottom:5px;">🎵 MÚSICA MENU</p>
+    <input type="range" min="0" max="1" step="0.1" value="0.1" oninput="mudarVolume('musica', this.value)" style="width:100%;">
+</div>
+
+<div style="background:#252525; padding:15px; border-radius:10px; border:1px solid #444; margin-bottom:15px;">
+    <p style="color:#2ecc71; font-size:12px; margin-bottom:5px;">🏟️ TORCIDA & EFEITOS</p>
+    <input type="range" min="0" max="1" step="0.1" value="0.5" oninput="mudarVolume('sfx', this.value)" style="width:100%;">
+</div>
+            <p style="color:#aaa; margin-bottom:10px; font-size:14px;">DURAÇÃO DA PARTIDA</p>
+            <button class="btn-config" id="btn-05min" onclick="setDuracao(0.5)">⚡ Rápido (30s)</button>
+            <button class="btn-config active" id="btn-1min" onclick="setDuracao(1)">⏱️ Normal (1 min)</button>
+            <button class="btn-config" id="btn-2min" onclick="setDuracao(2)">🐢 Lento (2 min)</button>
+            <hr style="border:1px solid #333; margin:15px 0;">
+             <button class="btn-config" style="border-color:#e74c3c; color:#e74c3c; font-weight:bold;" onclick="resetarTudo()">
+            ⚠️ APAGAR SAVE E REINICIAR
+             </button>
+        </div>
+    </div>
+
+    <div id="modal-jogo" class="tela" style="z-index:200;">
+    <div class="placar-live">
+    <div class="timer-box" style="font-size:20px; color:#f1c40f; border:2px solid #f1c40f; padding:5px 20px; border-radius:20px; display:inline-block; margin-bottom:15px; background:rgba(241,196,15,0.1);"><span id="tempo-jogo">0</span>'</div>
+    
+    <div class="score-box" id="placar-container">
+        <span id="placar-casa">0</span> x <span id="placar-fora">0</span>
+    </div>
+    
+    <div style="font-size:14px; color:#aaa; margin-top:5px; display:flex; justify-content:space-between; padding:0 15px; width:100%;">
+        <span id="live-home" style="width:45%; text-align:right; font-weight:bold; color:white;">EU</span>
+        <span style="width:10%; text-align:center; color:#f1c40f;">vs</span>
+        <span id="live-away" style="width:45%; text-align:left; font-weight:bold; color:white;">CPU</span>
+    </div>
+</div>
+
+ <div class="game-controls" style="flex-direction:column; gap:10px;">
+    <div style="display:flex; justify-content:center; gap:3px; width:100%;">
+        <button id="btn-tac-def" class="btn-action" style="flex:1; border:1px solid #555; font-size:10px;" onclick="mudarTatica('def')">🛡️ RETRANCA</button>
+        <button id="btn-tac-cnt" class="btn-action" style="flex:1; border:1px solid #555; font-size:10px;" onclick="mudarTatica('cnt')">⚡ CONTRA</button>
+        <button id="btn-tac-nor" class="btn-action" style="flex:1; background:#f1c40f; color:black; border:1px solid white; font-size:10px;" onclick="mudarTatica('normal')">⚖️ NORMAL</button>
+        <button id="btn-tac-pos" class="btn-action" style="flex:1; border:1px solid #555; font-size:10px;" onclick="mudarTatica('pos')">⚽ POSSE</button>
+        <button id="btn-tac-atk" class="btn-action" style="flex:1; border:1px solid #555; font-size:10px;" onclick="mudarTatica('atk')">⚔️ ATAQUE</button>
+    </div>
+    
+    <div style="display:flex; justify-content:center; gap:15px;">
+        <button class="btn-ctrl" onclick="pausarJogo()">⏸ PAUSAR</button>
+        <button class="btn-ctrl" onclick="abrirSubstituicao()">🔄 SUBSTITUIR</button>
+    </div>
+</div>
+
+        <div class="narracao-area" id="narracao-feed"></div>
+        <button id="btn-fim-jogo" class="btn-gold" style="display:none; width:90%; margin:20px;" onclick="encerrarPartida()">VER RESULTADO</button>
+    </div>
+
+    <div id="modal-relatorio" class="modal-overlay">
+        <div class="detalhes-card">
+            <h3 style="color:#f1c40f; text-align:center; margin-bottom:15px;">RESUMO FINANCEIRO</h3>
+            <div class="relatorio-row"><span>Bilheteria (<span id="rel-publico">0</span>):</span><span class="val-green" id="rel-renda">+ R$ 0</span></div>
+            <div class="relatorio-row"><span>Patrocínio:</span><span class="val-green" id="rel-patro">+ R$ 0</span></div>
+            <div class="relatorio-row"><span>Custos do Jogo:</span><span class="val-red">- R$ 1.400</span></div>
+            
+            <div id="box-despesas" style="display:none; background:#2c0e0e; padding:8px; margin-top:10px; border-radius:5px; border:1px solid #e74c3c;">
+                <div style="color:#e74c3c; font-size:10px; font-weight:bold; text-align:center;">PAGAMENTO MENSAL</div>
+                <div class="relatorio-row"><span>Salários (Folha):</span><span class="val-red" id="rel-salario">- R$ 0</span></div>
+                <div class="relatorio-row"><span>Manutenção Patro:</span><span class="val-red" id="rel-manutencao">- R$ 0</span></div>
+            </div>
+            <div style="border-top:1px solid #444; margin-top:10px; padding-top:10px; display:flex; justify-content:space-between;"><span style="color:#aaa;">SALDO DA RODADA:</span><span style="font-size:18px; font-weight:bold;" id="rel-total">R$ 0</span></div>
+            <div style="text-align:center; margin-top:15px; font-size:12px; color:#aaa;">Torcida: <span id="rel-fans-change" style="font-weight:bold; color:white;">0</span></div>
+            <button class="btn-gold" onclick="fecharRelatorio()">CONTINUAR</button>
+        </div>
+    </div>
+
+    <div id="modal-fim-temporada" class="modal-overlay">
+        <div class="detalhes-card" style="text-align:center;">
+            <div id="anim-confete"></div>
+            <h2 style="color:#f1c40f; margin-bottom:10px;">FIM DA TEMPORADA!</h2>
+            <div id="temp-msg" style="font-size:18px; color:white; margin-bottom:20px;"></div>
+            <div style="background:#333; padding:15px; border-radius:10px; margin-bottom:20px;">
+                <div>Sua Posição: <b id="temp-pos" style="font-size:24px; color:#2ecc71">1º</b></div>
+            </div>
+            <button class="btn-gold" onclick="iniciarNovaTemporada()">INICIAR NOVA TEMPORADA</button>
+        </div>
+    </div>
+
+    <div id="modal-evento" class="modal-overlay">
+        <div class="detalhes-card">
+            <h3 id="evt-titulo" style="color:#9b59b6; text-align:center; margin-bottom:10px;">EVENTO</h3>
+            <p id="evt-texto" style="color:#ccc; text-align:center; margin-bottom:20px; font-size:14px;"></p>
+            
+            <button id="btn-evt-1" class="evt-btn" style="background:#2c3e50; color:white; border-left:5px solid #2ecc71;" onclick="resolverEvento(1)"></button>
+            <button id="btn-evt-2" class="evt-btn" style="background:#2c3e50; color:white; border-left:5px solid #e74c3c;" onclick="resolverEvento(2)"></button>
+        </div>
+    </div>
+
+    <div id="modal-gestao" class="modal-overlay">
+        <div class="detalhes-card" style="width:300px;">
+            <h3 style="color:#f1c40f; text-align:center; margin-bottom:20px;">GESTÃO</h3>
+            <div class="btn-gestao" onclick="abrirElenco(false)">
+                <span>👕</span> VER ELENCO
+            </div>
+            <div class="btn-gestao" onclick="abrirSelecionarJogadorParaTreino()">
+                <span>💪</span> CENTRO DE TREINAMENTO
+            </div>
+            <div class="btn-gestao" onclick="abrirBase()">
+                <span>👶</span> CATEGORIA DE BASE
+            </div>
+            <button class="btn-gold" onclick="document.getElementById('modal-gestao').style.display='none'" style="margin-top:15px; background:#444;">VOLTAR</button>
+        </div>
+    </div>
+
+    <div id="modal-base" class="modal-overlay">
+        <div class="detalhes-card">
+            <h3 style="color:#f1c40f; text-align:center; margin-bottom:10px;">PENEIRA (BASE)</h3>
+            <p style="color:#aaa; text-align:center; font-size:13px; margin-bottom:20px;">Custo: R$ 1.000 por teste.<br>Perna de Pau, Esforçado ou Jóia Rara?</p>
+            
+            <div id="base-result" style="display:none; background:#222; padding:15px; border-radius:10px; margin-bottom:15px; text-align:center; border:1px solid #444;">
+                <div id="base-player-info" style="font-weight:bold; font-size:18px; color:white; margin-bottom:5px;"></div>
+                <div id="base-player-pot" style="color:#f1c40f; font-size:14px;"></div>
+                <div id="base-player-cost" style="color:#e74c3c; font-size:12px; margin-top:5px;"></div>
+                <button class="btn-action" style="background:#2ecc71; color:black; margin-top:10px;" onclick="contratarBase()">CONTRATAR</button>
+            </div>
+
+            <button class="btn-gold" onclick="realizarPeneira()">FAZER PENEIRA (R$ 1.000)</button>
+            <button class="btn-gold" onclick="document.getElementById('modal-base').style.display='none'" style="margin-top:10px; background:#444;">FECHAR</button>
+        </div>
+    </div>
+
+    <div id="modal-selecao-treino" class="modal-overlay">
+        <div class="detalhes-card">
+            <h3 style="color:#f1c40f; text-align:center;">QUEM VAI TREINAR?</h3>
+            <p style="text-align:center; color:#aaa; margin-bottom:15px;">Escolha um atleta:</p>
+            <div class="list-container" id="lista-treino-selecao" style="max-height:300px; overflow-y:auto;"></div>
+            <button class="btn-gold" onclick="document.getElementById('modal-selecao-treino').style.display='none'" style="margin-top:10px; background:#444;">CANCELAR</button>
+        </div>
+    </div>
+
+    <div id="modal-detalhes" class="modal-overlay">
+        <div class="detalhes-card">
+            <h3 id="det-nome" style="color:#f1c40f; margin-bottom:15px; text-align:center;">Nome</h3>
+            <div id="det-stats"></div>
+            <div id="det-actions" style="margin-top:15px;"></div>
+            
+            <div style="margin-top:15px; padding-top:10px; border-top:1px solid #444;">
+                <h4 style="color:#aaa; font-size:12px; margin-bottom:10px; text-align:center;">EVOLUÇÃO INDIVIDUAL</h4>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px;">
+                    <div class="btn-action" onclick="treinarIndividual('rachao')" style="text-align:center; background:#333;">
+                        Rachão (R$ 50)<br><small style="color:#e74c3c">-15% Ener</small>
+                    </div>
+                    <div class="btn-action" onclick="treinarIndividual('tatico')" style="text-align:center; background:#333;">
+                        Tático (R$ 500)<br><small style="color:#f1c40f">-5% Ener</small>
+                    </div>
+                </div>
+                <div class="btn-action" onclick="treinarIndividual('personal')" style="width:100%; text-align:center; background:#2980b9; margin-top:5px; padding:10px;">
+                    PERSONAL (+3 Pts) <br> R$ 2.000 (Sem Cansaço)
+                </div>
+            </div>
+
+            <div id="area-venda" style="margin-top:15px; border-top:1px solid #444; padding-top:10px;"></div>
+            <button class="btn-gold" onclick="fecharDetalhesEVoltar()" style="margin-top:10px; background:#444;">FECHAR</button>
+        </div>
+    </div>
+
+    <div id="modal-select-stat" class="modal-overlay">
+        <div class="detalhes-card">
+            <h3 style="color:#f1c40f; text-align:center; margin-bottom:15px;">FOCO DO TREINO</h3>
+            <p style="text-align:center; color:#aaa; font-size:12px; margin-bottom:15px;">Escolha onde aplicar +3 pontos:</p>
+            <button class="btn-config" onclick="aplicarPontosTreino('vel')">⚡ VELOCIDADE</button>
+            <button class="btn-config" onclick="aplicarPontosTreino('chu')">👟 CHUTE</button>
+            <button class="btn-config" onclick="aplicarPontosTreino('pas')">🎯 PASSE</button>
+            <button class="btn-config" onclick="aplicarPontosTreino('def')">🛡️ DEFESA</button>
+            <button class="btn-config" onclick="aplicarPontosTreino('fis')">🏋️ FÍSICO</button>
+            <button class="btn-gold" onclick="document.getElementById('modal-select-stat').style.display='none'" style="margin-top:10px; background:#444;">CANCELAR</button>
+        </div>
+    </div>
+
+    <div id="modal-rodada" class="modal-overlay">
+        <div class="detalhes-card"></div>
+    </div>
+
+    <div id="modal-pause" class="modal-overlay">
+        <h2 style="color:white; margin-bottom:20px;">JOGO PAUSADO</h2>
+        <button class="btn-gold" style="width:200px;" onclick="continuarJogo()">VOLTAR</button>
+        <button class="btn-gold" style="width:200px; background:#e74c3c; margin-top:10px;" onclick="sairJogo()">SAIR DA PARTIDA</button>
+    </div>
+
+    <div id="modal-intervalo" class="modal-overlay">
+        <h2 style="color:white;">INTERVALO</h2>
+        <div id="timer-intervalo" style="font-size:60px; color:#f1c40f;">15</div>
+        <p style="color:#aaa;">Descanse...</p>
+        <button class="btn-gold" style="width:200px; margin-top:20px;" onclick="pularIntervalo()">PULAR</button>
+    </div>
+<script>
+    /* --- DADOS GLOBAIS --- */
+    var SAVE_KEY = "fpManager_V001_EventsVarzea"; 
+    
+    // --- FUNÇÃO QUE FALTAVA ---
+function getPosicaoSimplificada(p) { 
+    return (p === "GOL") ? "GOL" : (p === "ZAG" || p === "LAT") ? "DEF" : p; 
+}
+
+    // CONFIGURAÇÃO INICIAL
+    var gameData = { 
+        nomeTime: "Time", treinador: "Eu", rodada: 1, ligaName: "Várzea Regional", 
+        nivelLiga: 1, 
+        pais: "Brasil", estadio: "Municipal", 
+        torcida: 150, reputacao: "Várzea Raiz", formacao: "4-4-2", 
+        dinheiro: 80500, 
+        cicloPagamento: 1, capacidadeEstadio: 1000 
+    };
+    
+    var leagueData = [], myPlayers = [], marketPlayers = [];
+    var fullSchedule = []; 
+    var opponentIndex = -1, currentStyle = 0, selectedPlayer = null, currentLogoIndex = 0;
+    var viewingPlayerIndex = -1; 
+    var tempBasePlayer = null; 
+    var savedFlagCss = ""; 
+    var currentShapeCss = "50%"; 
+    // Mude a linha do var config para ficar assim:
+    var config = { duracao: 1, audio: true, volMusica: 0.1, volSfx: 0.5 };
+    var taticaAtual = "normal"; // Começa sempre equilibrado
+
+    // Variáveis de Controle
+    var lastAutoRound = -10; 
+    var tempo = 0, pHome = 0, pAway = 0, intervalGame = null;
+    var isPaused = false, isInGame = false, isHalftime = false, subsMade = 0;
+    var homeRed = 0, awayRed = 0;
+    var viewRound = 1;
+    var roundFinished = false;
+    var currentRoundMatches = [];
+    var myMatchReference = null;
+    var MAX_SUBS = 5;
+    var tetoAtual = 35;
+    
+    // Variável para controlar o evento atual
+    var currentEvent = null;
+
+    // --- LISTA DE PATROCÍNIOS BALANCEADA (TEMPORADA INTEIRA) ---
+var patrocinios = [
+    { 
+        id: 0, 
+        nome: "Bar do Zé", 
+        custo: 4500,        // Barato pra entrar
+        renda: 2500,        // Paga a conta de luz
+        manutencao: 2000,   // Custo baixo
+        fans: 60, 
+        ativo: false, 
+        tier: "tier-bronze", 
+        reqFans: 0          // Qualquer um pega
+    },
+    { 
+        id: 1, 
+        nome: "Mercado Silva", 
+        custo: 25000,       // Investimento Médio
+        renda: 12000,       // 48k por mês
+        manutencao: 20000,  // Sobra 28k limpo (+ bilheteria)
+        fans: 150, 
+        ativo: false, 
+        tier: "tier-prata", 
+        reqFans: 500        // Precisa de fama
+    },
+    { 
+        id: 2, 
+        nome: "Bet da Várzea", 
+        custo: 150000,      // Caro pra assinar (Luvas)
+        renda: 45000,       // 180k por mês (Paga a folha salarial)
+        manutencao: 80000,  // Custo alto de marketing
+        fans: 500, 
+        ativo: false, 
+        tier: "tier-master", 
+        reqFans: 2000       // Só pra time grande
+    }
+];
+    var logos = ["", "🐺", "🦊", "🦁", "🦅", "🦈", "🐉", "🐻", "💀", "⚡", "⚽", "👑", "⚔️", "🛡️", "⚓", "⭐"];
+    var frasesFlavor = [
+    "Bola rodando no meio campo...", "A torcida canta sem parar!", "O técnico grita orientações.", 
+    "Zagueirão dá um bico pra frente!", "Jogo muito disputado na lateral.", "O juiz manda seguir...", 
+    "Clima tenso entre os jogadores.", "Começa a chuviscar no estádio.", "Tentativa de contra-ataque...", 
+    "O goleiro repõe a bola rápido.", "Lançamento longo... interceptado!", "Troca de passes envolvente.", 
+    "A bola quica no morrinho artilheiro.", "Dividida forte no meio!", "O time recua para respirar.",
+    "Bate e rebate na entrada da área.", "O bandeirinha assinala impedimento.", "Tentativa de drible frustrada.",
+    "A torcida pede raça!", "O juiz olha pro relógio.", "Chutão pra onde o nariz aponta!",
+    "Bela triangulação no ataque.", "A zaga afasta o perigo.", "O time busca espaços na defesa.",
+    "Cruzamento na área... ninguém cabeceia.", "O meia pede a bola.", "Marcação sob pressão!",
+    "O atacante tenta a jogada individual.", "Falta marcada no meio campo.", "Jogo truncado neste momento.",
+    "O goleiro faz cera...", "A bola sai pela lateral.", "Cobrança de lateral para a área.",
+    "O técnico adversário reclama.", "A torcida acende sinalizadores!", "Bola perigosa na pequena área!",
+    "O zagueiro sobe no terceiro andar!", "Dominou no peito e tocou.", "Toque de calcanhar ousado!",
+    "A bola passou raspando!", "Goleiro encaixa com segurança.", "O time joga no erro do adversário.",
+    "A torcida vaia a posse de bola passiva.", "Que categoria do camisa 10!", "Carrinho limpo na bola.",
+    "O jogo ganha velocidade!", "Momentos de tensão na arquibancada.", "O massagista entra em campo."
+];
+
+    var schemas = {
+        "4-4-2": ["GOL","DEF","DEF","DEF","DEF","MEI","MEI","MEI","MEI","ATA","ATA"],
+        "4-3-3": ["GOL","DEF","DEF","DEF","DEF","MEI","MEI","MEI","ATA","ATA","ATA"],
+        "5-4-1": ["GOL","DEF","DEF","DEF","DEF","DEF","MEI","MEI","MEI","MEI","ATA"]
+    };
+
+    var styles = [
+        (c1,c2)=>"background:"+c1, (c1,c2)=>"background:radial-gradient(circle, "+c2+" 40%, transparent 40%), "+c1,
+        (c1,c2)=>"background:linear-gradient(180deg, "+c1+" 30%, "+c2+" 30%)", (c1,c2)=>"background:repeating-linear-gradient(90deg,"+c1+","+c1+" 10%,"+c2+" 10%,"+c2+" 20%)",
+        (c1,c2)=>"background:repeating-linear-gradient(0deg,"+c1+","+c1+" 10%,"+c2+" 10%,"+c2+" 20%)", (c1,c2)=>"background:linear-gradient(45deg,"+c1+" 45%,"+c2+" 45%,"+c2+" 55%,"+c1+" 55%)",
+        (c1,c2)=>"background:linear-gradient(90deg,"+c1+" 35%,"+c2+" 35%,"+c2+" 65%,"+c1+" 65%)", (c1,c2)=>"background:linear-gradient(0deg,"+c1+" 35%,"+c2+" 35%,"+c2+" 65%,"+c1+" 65%)",
+        (c1,c2)=>"background:linear-gradient(90deg,transparent 45%,"+c2+" 45%,"+c2+" 55%,transparent 55%),linear-gradient(0deg,"+c1+" 45%,"+c2+" 45%,"+c2+" 55%,"+c1+" 55%),"+c1,
+        (c1,c2)=>"background:conic-gradient("+c1+" 0deg 90deg,"+c2+" 90deg 180deg,"+c1+" 180deg 270deg,"+c2+" 270deg 360deg)",
+        (c1,c2)=>"background:repeating-conic-gradient("+c1+" 0% 25%, "+c2+" 0% 50%); background-size: 30px 30px;", (c1,c2)=>"background:linear-gradient(135deg,"+c1+" 50%,"+c2+" 50%)"
+    ];
+
+    /* --- SISTEMA DE EVENTOS DA VÁRZEA --- */
+    var listaEventos = [
+        {
+            titulo: "RIFA DA TIA",
+            texto: "A tia da cantina fez uma rifa de um frango assado e doou parte do lucro pro time!",
+            op1: { txt: "PEGAR GRANA (+R$ 800)", eff: () => { addMoney(800); } },
+            op2: { txt: "INVESTIR NA BASE (Moral)", eff: () => { gameData.torcida += 5; alert("Torcida gostou da atitude!"); } }
+        },
+        {
+            titulo: "ÔNIBUS QUEBRADO",
+            texto: "O motor do ônibus pifou no meio da estrada. O mecânico cobra caro.",
+            op1: { txt: "PAGAR CONSERTO (-R$ 500)", eff: () => { addMoney(-500); } },
+            op2: { txt: "IR A PÉ (Cansaço)", eff: () => { drainEnergy(15); alert("O time chegou exausto no jogo!"); } }
+        },
+        {
+            titulo: "CHURRASCO PÓS-TREINO",
+            texto: "O elenco está pedindo um churrasco para motivar.",
+            op1: { txt: "PAGAR CARNE (-R$ 300)", eff: () => { addMoney(-300); recoverEnergy(10); alert("Energia recuperada!"); } },
+            op2: { txt: "HOJE NÃO (Sem efeito)", eff: () => { alert("O time ficou meio chateado..."); } }
+        },
+        {
+            titulo: "JOGADOR NA BALADA",
+            texto: "Seu atacante foi visto na balada ontem à noite bebendo todas.",
+            op1: { txt: "MULTAR JOGADOR (+R$ 500)", eff: () => { addMoney(500); alert("Multa aplicada. Ele ficou bravo."); } },
+            op2: { txt: "PERDOAR (Cansaço)", eff: () => { drainEnergy(10); alert("Ele vai jogar de ressaca."); } }
+        },
+        {
+            titulo: "GRAMADO ALAGADO",
+            texto: "Choveu muito! O campo está cheio de poças.",
+            op1: { txt: "PAGAR DRENAGEM (-R$ 600)", eff: () => { addMoney(-600); } },
+            op2: { txt: "JOGAR NA LAMA (Risco Lesão)", eff: () => { drainEnergy(20); alert("Foi um jogo pesado e cansativo."); } }
+        },
+        {
+            titulo: "VAQUINHA DA TORCIDA",
+            texto: "A torcida organizada fez uma vaquinha para ajudar o clube.",
+            op1: { txt: "RECEBER (+R$ 1.200)", eff: () => { addMoney(1200); } },
+            op2: { txt: "RECEBER (+R$ 1.200)", eff: () => { addMoney(1200); } } // Só tem opção boa
+        }
+    ];
+
+    function checarEventoAleatorio() {
+        // 15% de chance de evento se não for a rodada 1
+        if (gameData.rodada > 1 && Math.random() < 0.15) {
+            var evtIndex = Math.floor(Math.random() * listaEventos.length);
+            currentEvent = listaEventos[evtIndex];
+            mostrarModalEvento();
+        }
+    }
+
+    function mostrarModalEvento() {
+        document.getElementById('evt-titulo').innerText = currentEvent.titulo;
+        document.getElementById('evt-texto').innerText = currentEvent.texto;
+        
+        var btn1 = document.getElementById('btn-evt-1');
+        var btn2 = document.getElementById('btn-evt-2');
+        
+        btn1.innerText = currentEvent.op1.txt;
+        btn1.onclick = function() { resolverEvento(1); };
+        
+        btn2.innerText = currentEvent.op2.txt;
+        btn2.onclick = function() { resolverEvento(2); };
+        
+        document.getElementById('modal-evento').style.display = 'flex';
+    }
+
+    function resolverEvento(op) {
+        if(op === 1) currentEvent.op1.eff();
+        else currentEvent.op2.eff();
+        
+        document.getElementById('modal-evento').style.display = 'none';
+        atualizarRodada(); // Atualiza a tela com os novos valores (dinheiro/energia)
+    }
+/* --- FUNÇÃO PARA INICIAR NOVA TEMPORADA E AUMENTAR DIFICULDADE --- */
+function iniciarNovaTemporada() {
+    var pos = leagueData.findIndex(t => t.isPlayer) + 1;
+    
+    // Lógica de Promoção/Rebaixamento
+    if (pos <= 4) {
+        gameData.nivelLiga++; // Sobe de nível
+        gameData.ligaName = "Divisão " + (10 - gameData.nivelLiga); // Ex: Divisão 9, Divisão 8...
+        alert("Parabéns! Bem-vindo ao Nível " + gameData.nivelLiga + "!\nOs times aqui são MUITO mais fortes.");
+    } else if (pos >= 17) {
+        if(gameData.nivelLiga > 1) {
+            gameData.nivelLiga--; // Cai de nível
+            gameData.ligaName = "Divisão " + (10 - gameData.nivelLiga);
+            alert("Rebaixado... Voltando para um nível mais fácil.");
+        } else {
+            alert("Você já está na última divisão (Várzea). Tente não falir!");
+        }
+    } else {
+        alert("Nova temporada na mesma divisão.");
+    }
+
+    // Reseta Dados da Temporada
+    gameData.rodada = 1;
+    gameData.premioRecebido = false;
+    gameData.cicloPagamento = 1;
+    lastAutoRound = -10;
+
+    // Limpa a liga antiga para forçar a criação de uma nova
+    leagueData = [];
+    fullSchedule = [];
+
+    // Recria a liga (A função gerarLiga usa gameData.nivelLiga para definir a força dos times)
+    // Se nivelLiga aumentou, o 'baseDif' lá dentro vai aumentar o OVR dos inimigos.
+    gerarLiga();
+    
+    // Atualiza Mercado
+    gerarMercado();
+
+    // Fecha modal e salva
+    document.getElementById('modal-fim-temporada').style.display = 'none';
+    atualizarRodada();
+    salvarJogoAuto();
+     nav('t-home', 't-home'); // Recarrega visual.
+}
+    // Helpers para eventos
+    function addMoney(val) {
+        gameData.dinheiro += val;
+        alert(val > 0 ? "Você ganhou R$ " + val : "Você gastou R$ " + Math.abs(val));
+    }
+    function drainEnergy(val) {
+        myPlayers.forEach(p => p.energia = Math.max(0, p.energia - val));
+    }
+    function recoverEnergy(val) {
+        myPlayers.forEach(p => p.energia = Math.min(100, p.energia + val));
+    }
+    function addTorcida(val) { gameData.torcida += val; }
+
+
+    /* --- NAVEGAÇÃO E UTILS --- */
+    function nav(s, e) { 
+        var start = document.getElementById(s);
+        var end = document.getElementById(e);
+        if(start) start.style.display='none'; 
+        if(end) end.style.display='flex'; 
+    }
+    
+    /* --- SUBSTIUA AS FUNÇÕES safePlay E stopSound ANTIGAS POR ESTAS --- */
+
+function safePlay(id) { 
+    if(config.audio){ 
+        try {
+            var el = document.getElementById("sfx-" + id);
+          if(el) {
+                el.currentTime = 0; // Reinicia o som se já estiver tocando
+               el.volume = config.volSfx;
+                var playPromise = el.play();
+                
+                if (playPromise !== undefined) {
+                     playPromise.catch(error => {
+                        console.log("Áudio bloqueado pelo navegador (clique na tela para liberar).");
+                    });
+                }
+            }
+        } catch(e){ console.log("Erro de áudio: " + e); } 
+    } 
+}
+
+function stopSound(id) { 
+    var el = document.getElementById("sfx-" + id); 
+    if(el){ 
+        el.pause(); 
+        el.currentTime = 0; 
+    } 
+}
+
+    function calcularPreco(ovr) {
+        var base = (ovr * ovr) * 10;
+        if(ovr >= 60) base *= 2.5;
+        if(ovr >= 75) base *= 2;
+        if(ovr >= 85) base *= 1.5;
+        var variacao = (Math.random() * 0.2) + 0.9; 
+        return Math.floor(base * variacao);
+    }
+
+    function setShape(shapeCss, btn) {
+        currentShapeCss = shapeCss;
+        var f = document.getElementById('flag-main');
+        if(f) f.style.borderRadius = shapeCss;
+        document.querySelectorAll('.btn-shape').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+    }
+function irParaPais() { 
+   var musica = document.getElementById('musicaFundo');
+if(musica) { 
+    musica.volume = 0.1; // <--- MUDE AQUI PARA 0.1
+    musica.play().catch(e => {}); 
+}
+    // REMOVIDO: safePlay('apito'); (Tiramos o apito daqui)
+    
+    nav('t-inicio', 't-pais'); 
+}
+/* --- FUNÇÃO QUE ESTAVA FALTANDO --- */
+function selectCountry(n, l) { 
+    gameData.ligaName = "Várzea Regional"; 
+    gameData.pais = n; 
+    
+    // Atualiza o texto na próxima tela
+    var lbl = document.getElementById('lbl-liga-start');
+    if(lbl) lbl.innerText = "Início na Várzea"; 
+    
+    // Vai para a tela de criar time
+    nav('t-pais', 't-login'); 
+}
+
+       function irParaBandeira() {
+        var n=document.getElementById('inp-nome').value.trim()||"Técnico", t=document.getElementById('inp-time').value.trim()||"Meu Time FC", e=document.getElementById('inp-estadio').value.trim()||"Campo Local";
+        gameData.treinador=n; gameData.nomeTime=t; gameData.estadio=e;
+        
+        var l=document.getElementById('logo-list'); l.innerHTML="";
+        logos.forEach((lg,i)=>{
+            var b=document.createElement('div'); b.className='btn-logo'; b.innerText=lg||"🚫";
+            if(i===0)b.classList.add('selected');
+            b.onclick=function(){currentLogoIndex=i; updateFlag(); document.querySelectorAll('.btn-logo').forEach(k=>k.classList.remove('selected')); this.classList.add('selected');};
+            l.appendChild(b);
+        });
+
+        var g=document.getElementById('grid-styles'); g.innerHTML="";
+        styles.forEach((st,i)=>{
+            var d=document.createElement('div'); d.className='btn-style'; d.style=st('#fff','#000');
+            if(i===0)d.classList.add('selected');
+            d.onclick=function(){currentStyle=i; updateFlag();};
+            g.appendChild(d);
+        });
+        nav('t-login', 't-bandeira'); updateFlag();
+    }
+    
+    function updateFlag() {
+        var c1=document.getElementById('cor1').value, c2=document.getElementById('cor2').value;
+        savedFlagCss=styles[currentStyle](c1,c2);
+        var f=document.getElementById('flag-main'); 
+        if(f){
+            f.style.background = savedFlagCss.replace("background:", ""); 
+            f.style.borderRadius = currentShapeCss; 
+            f.innerText=logos[currentLogoIndex];
+        }
+        document.querySelectorAll('.btn-style').forEach((b,i)=>b.style=styles[i](c1,c2));
+    }
+
+    function finalizarCriacao() {
+        document.getElementById('txt-team-name').innerText = gameData.nomeTime;
+        document.getElementById('info-tecnico').innerText = gameData.treinador;
+        document.getElementById('info-liga').innerText = gameData.ligaName;
+        document.getElementById('info-pais').innerText = gameData.pais;
+        document.getElementById('lbl-dinheiro').innerText = "R$ " + gameData.dinheiro.toLocaleString('pt-BR');
+        
+        gameData.torcida = Math.floor(Math.random() * 101) + 100;
+        if(!gameData.capacidadeEstadio) gameData.capacidadeEstadio = 1000;
+        
+        document.getElementById('info-torcida').innerText = gameData.torcida + " fiéis";
+        document.getElementById('info-estadio').innerText = gameData.estadio;
+        var elRep = document.getElementById('info-reputacao'); if(elRep) elRep.innerText = gameData.reputacao;
+        
+        var headFlag = document.getElementById('header-flag'); 
+        if(headFlag && savedFlagCss) { 
+            headFlag.setAttribute('style', savedFlagCss); 
+            headFlag.innerText = logos[currentLogoIndex];
+            headFlag.style.borderRadius = currentShapeCss;
+        }
+
+        gerarElenco(); gerarLiga(); gerarMercado();
+        atualizarForcaTimeTela(); salvarJogoAuto();
+        nav('t-bandeira', 't-home'); atualizarLabelPreco();
+
+        var folhaInicial = calcularFolhaSalarial();
+        alert(`BEM-VINDO!\n\nVocê inicia na Várzea.\nTermine no topo para subir.\nCuidado para não cair!\n\nFolha Salarial: R$ ${folhaInicial.toLocaleString('pt-BR')}.\nDICA: Compre o patrocínio "Bar do Zé"!`);
+    }
+
+    /* --- GESTÃO E NAVEGAÇÃO --- */
+    function abrirMenuGestao() {
+        fecharMenuSeAberto({stopPropagation:()=>{}}); 
+        document.getElementById('modal-gestao').style.display = 'flex';
+    }
+
+    function abrirSelecionarJogadorParaTreino() {
+        document.getElementById('modal-gestao').style.display = 'none'; 
+        var lista = document.getElementById('lista-treino-selecao');
+        lista.innerHTML = "";
+        
+        var sortedPlayers = myPlayers.map((p, i) => ({...p, originalIndex: i})).sort((a,b) => b.pot - a.pot);
+
+        sortedPlayers.forEach((p) => {
+            var cls = p.ovr>=65?"card-gold":p.ovr>=50?"card-silver":"card-bronze";
+            var statusTreino = p.treinou ? '<span style="color:#e74c3c; font-size:10px;">(TREINOU)</span>' : '';
+            var potColor = p.pot >= 80 ? "#2ecc71" : p.pot >= 60 ? "#f1c40f" : "#aaa";
+            
+            lista.innerHTML += `
+            <div class="p-card ${cls}" onclick="selecionarJogadorParaTreino(${p.originalIndex})">
+                <div style="width:100%; display:flex; justify-content:space-between; align-items:center;">
+                    <div><b>${p.nome}</b> <small>(${p.pos})</small> ${statusTreino}</div>
+                    <div style="text-align:right;">
+                        <div style="background:#000; color:white; padding:2px 8px; border-radius:4px; font-size:12px;">GER ${p.ovr}</div>
+                        <div style="font-size:10px; color:${potColor}">POT ${p.pot}</div>
+                    </div>
+                </div>
+            </div>`;
+        });
+        
+        document.getElementById('modal-selecao-treino').style.display = 'flex';
+    }
+
+    function selecionarJogadorParaTreino(idx) {
+        document.getElementById('modal-selecao-treino').style.display = 'none';
+        infoP(idx, {stopPropagation:()=>{}}); 
+    }
+
+    /* --- SISTEMA DE BASE --- */
+    function abrirBase() {
+        document.getElementById('modal-gestao').style.display = 'none';
+        document.getElementById('base-result').style.display = 'none'; 
+        document.getElementById('modal-base').style.display = 'flex';
+    }
+
+    function realizarPeneira() {
+        if(gameData.dinheiro < 1000) { alert("Sem dinheiro (R$ 1.000)!"); return; }
+        if(myPlayers.length >= 25) { alert("Elenco cheio!"); return; }
+
+        gameData.dinheiro -= 1000;
+        document.getElementById('lbl-dinheiro').innerText = "R$ " + gameData.dinheiro.toLocaleString('pt-BR');
+
+        var rnd = Math.random();
+        var baseOvr, basePot, potText, color, custoLuvas = 0;
+        
+        if(rnd < 0.60) { 
+            baseOvr = Math.floor(Math.random() * 11) + 20; 
+            basePot = baseOvr + Math.floor(Math.random() * 15) + 5; 
+            potText = "Perna de Pau (POT BAIXO)"; color = "#aaa";
+        } else if (rnd < 0.95) { 
+            baseOvr = Math.floor(Math.random() * 9) + 31; 
+            basePot = 60 + Math.floor(Math.random() * 15); 
+            potText = "Esforçado (POT MÉDIO)"; color = "#f1c40f";
+        } else { 
+            baseOvr = Math.floor(Math.random() * 6) + 40; 
+            basePot = 85 + Math.floor(Math.random() * 14); 
+            potText = "💎 JÓIA RARA (POT " + basePot + ")"; color = "#2ecc71";
+            custoLuvas = Math.floor(Math.random() * 3000) + 3000; 
+        }
+
+        var pNames = ["Juninho","Pedrinho","Neto","Davi","Lucas","Matheus","Gabriel","Enzo","Miguel","Arthur","Luiz","Heitor","Diogo"];
+        var pPos = ["GOL","LAT","ZAG","MEI","ATA"];
+        
+        tempBasePlayer = {
+            nome: pNames[Math.floor(Math.random()*pNames.length)],
+            pos: pPos[Math.floor(Math.random()*pPos.length)],
+            ovr: baseOvr,
+            pot: basePot,
+            energia: 100,
+            stats: {vel:baseOvr, pas:baseOvr, chu:baseOvr, def:baseOvr, fis:baseOvr},
+            treinou: false,
+            custoLuvas: custoLuvas
+        };
+
+        var resDiv = document.getElementById('base-result');
+        resDiv.style.display = 'block';
+        resDiv.classList.remove('reveal-card'); void resDiv.offsetWidth; resDiv.classList.add('reveal-card');
+
+        document.getElementById('base-player-info').innerText = tempBasePlayer.nome + " (" + tempBasePlayer.pos + ") - GER " + tempBasePlayer.ovr;
+        var elPot = document.getElementById('base-player-pot');
+        elPot.innerText = potText;
+        elPot.style.color = color;
+        
+        var elCost = document.getElementById('base-player-cost');
+        if(custoLuvas > 0) {
+            elCost.innerText = "Custo Luvas: R$ " + custoLuvas.toLocaleString('pt-BR');
+        } else {
+            elCost.innerText = "Custo: Grátis (Promovido)";
+        }
+    }
+
+    function contratarBase() {
+        if(!tempBasePlayer) return;
+        
+        if(tempBasePlayer.custoLuvas > 0) {
+            if(gameData.dinheiro < tempBasePlayer.custoLuvas) {
+                alert("Falta dinheiro para as luvas! (R$ "+tempBasePlayer.custoLuvas+")");
+                return;
+            }
+            if(!confirm("Pagar R$ " + tempBasePlayer.custoLuvas + " de luvas?")) return;
+            gameData.dinheiro -= tempBasePlayer.custoLuvas;
+            document.getElementById('lbl-dinheiro').innerText = "R$ " + gameData.dinheiro.toLocaleString('pt-BR');
+        }
+
+        myPlayers.push(tempBasePlayer);
+        alert(tempBasePlayer.nome + " contratado!");
+        document.getElementById('base-result').style.display = 'none';
+        tempBasePlayer = null;
+        salvarJogoAuto();
+    }
+
+    /* --- SISTEMA DE TREINO --- */
+    function treinarIndividual(tipo) {
+        if(viewingPlayerIndex === -1) return;
+        var p = myPlayers[viewingPlayerIndex];
+        
+        if(p.treinou) { alert("Já treinou hoje!"); return; }
+        if(p.ovr >= p.pot) { alert("Potencial Máximo Atingido!"); return; }
+
+        var custo = 0;
+        if(tipo === 'rachao') custo = 50;
+        else if(tipo === 'tatico') custo = 500;
+        else if(tipo === 'personal') custo = 2000;
+
+        if(gameData.dinheiro < custo) { alert("Sem dinheiro!"); return; }
+
+        if(tipo === 'personal') {
+            document.getElementById('modal-select-stat').style.display = 'flex';
+            return;
+        }
+
+        var energiaCost = (tipo === 'rachao') ? 15 : 5;
+        if(p.energia < energiaCost) { alert("Jogador cansado!"); return; }
+
+        gameData.dinheiro -= custo;
+        p.energia -= energiaCost;
+        p.treinou = true;
+        
+        var chance = (tipo === 'rachao') ? 30 : 100;
+        
+        if(Math.random() * 100 < chance) {
+            var statKeys = ['vel','pas','chu','def','fis'];
+            var s = statKeys[Math.floor(Math.random()*statKeys.length)];
+            if(p.stats[s] < 99) p.stats[s]++;
+            p.ovr = Math.floor((p.stats.vel + p.stats.pas + p.stats.chu + p.stats.def + p.stats.fis)/5);
+            alert("Atributo subiu!");
+        } else {
+            alert("Treino feito, sem evolução.");
+        }
+
+        atualizarAposTreinoIndv();
+    }
+
+    function aplicarPontosTreino(stat) {
+        var p = myPlayers[viewingPlayerIndex];
+        if(gameData.dinheiro < 2000) return;
+        
+        if(p.ovr >= p.pot) { alert("Potencial Máximo Atingido!"); return; }
+
+        gameData.dinheiro -= 2000;
+        if(p.stats[stat] < 99) p.stats[stat] = Math.min(99, p.stats[stat] + 3);
+        p.ovr = Math.floor((p.stats.vel + p.stats.pas + p.stats.chu + p.stats.def + p.stats.fis)/5);
+        p.treinou = true;
+        
+        document.getElementById('modal-select-stat').style.display = 'none';
+        alert("+3 em " + stat.toUpperCase() + " aplicado!");
+        
+        atualizarAposTreinoIndv();
+    }
+
+    /* --- SALVA AUTOMATICAMENTE DEPOIS DE TREINAR --- */
+function atualizarAposTreinoIndv() {
+    document.getElementById('lbl-dinheiro').innerText = "R$ " + gameData.dinheiro.toLocaleString('pt-BR');
+    infoP(viewingPlayerIndex, {stopPropagation:()=>{}}); 
+    renderElenco(); 
+    atualizarForcaTimeTela();
+    salvarJogoAuto(); // <--- ADICIONEI AQUI
+}
+
+    /* --- NAVEGAÇÃO CORRIGIDA --- */
+    function fecharDetalhesEVoltar() {
+        document.getElementById('modal-detalhes').style.display = 'none';
+    }
+
+    /* --- AUTO ESCALAR INTELIGENTE (POSICIONAL) --- */
+    function autoEscalar() {
+        if(gameData.rodada - lastAutoRound < 8) {
+            var falta = 8 - (gameData.rodada - lastAutoRound);
+            alert("Auxiliar Técnico: 'Chefe, calma! Preciso de mais " + falta + " jogos para analisar.'");
+            return;
+        }
+
+        var formationSchema = schemas[gameData.formacao];
+        var pool = [...myPlayers]; // Cópia de todos os jogadores
+        var newTitulares = new Array(11).fill(null);
+
+        // Função de pontuação: OVR * (Energia)
+        var getScore = (p) => {
+            var eFactor = p.energia < 40 ? 0.3 : (p.energia/100);
+            return p.ovr * eFactor;
+        };
+
+        // Ordena todo mundo por score
+        pool.sort((a,b) => getScore(b) - getScore(a));
+
+        // 1. Preencher Titulares respeitando Posição
+        formationSchema.forEach((reqPos, index) => {
+            // Tenta achar o melhor para essa posição
+            var bestIdx = pool.findIndex(p => getPosicaoSimplificada(p.pos) === reqPos);
+            
+            if (bestIdx > -1) {
+                newTitulares[index] = pool[bestIdx];
+                pool.splice(bestIdx, 1); // Remove do pool
+            }
+        });
+
+        // 2. Preencher buracos (Improvisação)
+        for(let i=0; i<11; i++) {
+            if(!newTitulares[i]) {
+                if(pool.length > 0) newTitulares[i] = pool.shift();
+            }
+        }
+
+        // 3. Junta tudo (Titulares + Banco)
+        myPlayers = [...newTitulares, ...pool];
+
+        lastAutoRound = gameData.rodada;
+        renderElenco();
+        atualizarForcaTimeTela();
+        alert("Escalação Otimizada por Posição e Energia!");
+    }
+
+    /* --- MERCADO --- */
+    function gerarPlayerAleatorio() {
+        var pNames = ["Silva","Santos","Oliveira","Souza","Pereira","Lima","Ferreira","Costa","Rodrigues","Almeida","Nascimento","Alves","Carvalho","Araujo","Ribeiro","Sandes","araujo"];
+        var pPos = ["GOL","LAT","ZAG","MEI","ATA"];
+        var pos = pPos[Math.floor(Math.random()*pPos.length)];
+        var name = pNames[Math.floor(Math.random()*pNames.length)];
+        var tier = Math.random();
+        var baseOvr, basePot;
+        
+        var bonusLiga = (gameData.nivelLiga - 1) * 5;
+
+        if (tier < 0.4) { 
+            baseOvr = Math.floor(Math.random() * 10) + 30 + bonusLiga; 
+            basePot = baseOvr + Math.floor(Math.random() * 10); 
+        } else if (tier < 0.8) { 
+            baseOvr = Math.floor(Math.random() * 20) + 40 + bonusLiga; 
+            basePot = baseOvr + Math.floor(Math.random() * 15) + 5; 
+        } else { 
+            baseOvr = Math.floor(Math.random() * 20) + 60 + bonusLiga; 
+            basePot = Math.min(99, baseOvr + Math.floor(Math.random() * 20) + 5); 
+        }
+
+        var st={vel:baseOvr, pas:baseOvr, chu:baseOvr, def:baseOvr, fis:baseOvr};
+        if(pos==='ATA') { st.chu+=10; st.vel+=5; }
+        else if(pos==='ZAG') { st.def+=10; st.fis+=5; }
+        else if(pos==='GOL') { st.def+=15; }
+        
+        var realOvr = Math.floor((st.vel+st.pas+st.chu+st.def+st.fis)/5);
+        var preco = calcularPreco(realOvr);
+
+        return { nome: name, pos: pos, ovr: realOvr, pot: basePot, energia: 100, stats: st, preco: preco, treinou: false };
+    }
+
+    function gerarMercado() {
+        marketPlayers = [];
+        for(var i=0; i<5; i++) {
+            marketPlayers.push(gerarPlayerAleatorio());
+        }
+    }
+
+    function abrirMercado() {
+        var proxAtt = 4 - ((gameData.rodada - 1) % 4);
+        document.getElementById('aviso-mercado').innerText = "Novos jogadores em: " + proxAtt + " jogos";
+        
+        var c = document.getElementById('lista-mercado'); c.innerHTML = "";
+        marketPlayers.forEach((p, i) => {
+            var cls = p.ovr>=60?"card-gold":p.ovr>=40?"card-silver":"card-bronze";
+            var potClass = p.pot >= 80 ? 'pot-high' : p.pot >= 60 ? 'pot-med' : 'pot-low';
+            
+            c.innerHTML += `
+            <div class="market-card ${cls}" style="display:block;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <div style="display:flex; align-items:center;">
+                        <div class="ovr-box-market">${p.ovr}</div>
+                        <div>
+                            <b style="font-size:16px;">${p.nome}</b> <span style="font-size:12px; color:#aaa;">(${p.pos})</span>
+                            <span class="pot-badge ${potClass}">POT ${p.pot}</span>
+                            <div class="market-stats">VEL: ${p.stats.vel} | CHU: ${p.stats.chu}</div>
+                        </div>
+                    </div>
+                    <div style="text-align:right;">
+                        <div style="color:#f1c40f; font-weight:bold; margin-bottom:5px;">R$ ${p.preco.toLocaleString('pt-BR')}</div>
+                        <button class="btn-action" style="background:#2ecc71; color:black; font-weight:bold;" onclick="comprarJogador(${i})">COMPRAR</button>
+                    </div>
+                </div>
+            </div>`;
+        });
+        nav('t-home', 't-mercado');
+    }
+
+    function comprarJogador(idx) {
+        var p = marketPlayers[idx];
+        if (gameData.dinheiro >= p.preco) {
+            if (myPlayers.length >= 25) { alert("Elenco cheio (Max 25)!"); return; }
+            gameData.dinheiro -= p.preco;
+            myPlayers.push(p);
+            marketPlayers.splice(idx, 1); 
+            alert("Contratado!");
+            document.getElementById('lbl-dinheiro').innerText = "R$ " + gameData.dinheiro.toLocaleString('pt-BR');
+            abrirMercado();
+        } else alert("Dinheiro insuficiente!");
+    }
+
+    /* --- SALVA AUTOMATICAMENTE DEPOIS DE VENDER --- */
+function venderJogador(idx) {
+    if(myPlayers.length <= 11) { alert("Mínimo 11 jogadores!"); return; }
+    var p = myPlayers[idx];
+    var valorVenda = Math.floor(calcularPreco(p.ovr) * 0.6);
+    
+    if(confirm("Confirmar venda de " + p.nome + " por R$ " + valorVenda.toLocaleString('pt-BR') + "?")) {
+        gameData.dinheiro += valorVenda;
+        myPlayers.splice(idx, 1);
+        alert("Vendido!");
+        document.getElementById('lbl-dinheiro').innerText = "R$ " + gameData.dinheiro.toLocaleString('pt-BR');
+        document.getElementById('modal-detalhes').style.display = 'none';
+        renderElenco();
+        salvarJogoAuto(); // <--- ADICIONEI AQUI
+    }
+}
+
+
+    /* --- FINANÇAS E JOGO --- */
+    function determinarFase() {
+        if(fullSchedule.length===0) return "Pré-Temporada";
+        var pct = gameData.rodada / fullSchedule.length;
+        if(pct<=0.2){tetoAtual=35; return "Início";}
+        if(pct<=0.8){tetoAtual=55; return "Fase Regular";}
+        if(pct<1){tetoAtual=85; return "Decisivo";}
+        return "FINAL";
+    }
+
+    function getPlayerWage(ovr) { return ovr<50?Math.floor(ovr*20) : ovr<70?Math.floor(ovr*40) : ovr<85?Math.floor(ovr*100) : Math.floor(ovr*200); }
+    function calcularFolhaSalarial() { var t=0; myPlayers.forEach(p=>t+=getPlayerWage(p.ovr)); return t; }
+    
+    function atualizarLabelPreco() {
+        var el=document.getElementById('rng-preco'); if(!el)return;
+        var p=parseInt(el.value)||30;
+        document.getElementById('lbl-preco').innerText="R$ "+p;
+        var teto = 35 + Math.floor(gameData.capacidadeEstadio / 500); 
+        
+        var fase = determinarFase();
+        if(fase === "Fase Regular") teto += 20;
+        if(fase === "Decisivo" || fase === "FINAL") teto += 55;
+
+        teto += (gameData.nivelLiga - 1) * 15;
+
+        var av=document.getElementById('dica-preco');
+        if(p>teto){av.innerText="⚠️ Abusivo!"; av.style.color="#e74c3c";}
+        else if(p>teto*0.8){av.innerText="⚠️ Caro"; av.style.color="#f1c40f";}
+        else if(p<teto*0.4){av.innerText="💡 Barato"; av.style.color="#2ecc71";}
+        else {av.innerText="Justo"; av.style.color="#aaa";}
+        var elCap = document.getElementById('info-capacidade');
+        if(elCap) elCap.innerText = gameData.capacidadeEstadio.toLocaleString('pt-BR');
+    }
+
+    function abrirFinancas() {
+    // 1. Calcula as contas do mês
+    var t = calcularFolhaSalarial();
+    var custoP = 0; 
+    
+    // Soma a manutenção dos patrocínios ativos
+    patrocinios.forEach(p => {
+        if(p.ativo) custoP += p.manutencao;
+    });
+
+    // 2. Atualiza os textos na tela
+    document.getElementById('fin-fatura').innerText = "- R$ " + (t + custoP).toLocaleString('pt-BR');
+    document.getElementById('fin-capacidade').innerText = gameData.capacidadeEstadio.toLocaleString('pt-BR');
+    
+    // Atualiza o botão de evoluir estádio
+    var custoUp = Math.floor(gameData.capacidadeEstadio * 15); 
+    document.getElementById('custo-estadio').innerText = custoUp.toLocaleString('pt-BR');
+    document.querySelector('.stadium-box button').onclick = function() { evoluirEstadio(custoUp); };
+
+    // 3. GERA A LISTA DE PATROCÍNIOS (COM O BLOQUEIO)
+    var l = document.getElementById('lista-patrocinios'); 
+    l.innerHTML = ""; // Limpa a lista antes de desenhar
+
+    patrocinios.forEach((p, i) => {
+        // AQUI ESTÁ A MÁGICA DO BLOQUEIO:
+        var bloqueado = gameData.torcida < p.reqFans;
+        var textoBotao, corBotao, acao;
+
+        if (p.ativo) {
+            textoBotao = "ATIVO";
+            corBotao = "background:#444; color:#aaa; cursor:default; border:1px solid #555;";
+            acao = "";
+        } else if (bloqueado) {
+            textoBotao = `🔒 FALTA ${p.reqFans} TORCIDA`;
+            corBotao = "background:#2c0e0e; color:#777; border:1px solid #555; cursor:not-allowed;";
+            acao = "";
+        } else {
+            textoBotao = `ASSINAR (R$ ${p.custo.toLocaleString('pt-BR')})`;
+            corBotao = "background:#2ecc71; color:black; font-weight:bold; box-shadow:0 0 10px rgba(46,204,113,0.3);";
+            acao = `onclick="assinarPatrocinio(${i})"`;
+        }
+
+        // Desenha o cartão do patrocínio na tela
+        l.innerHTML += `
+        <div class="card-patro ${p.tier}">
+            <div class="patro-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <b style="font-size:16px;">${p.nome}</b>
+                ${p.ativo ? '<span style="font-size:10px; background:#2ecc71; color:black; padding:2px 6px; border-radius:4px;">ATIVO</span>' : ''}
+            </div>
+            
+            <div class="info-row"><span>Entrada (Luvas):</span><span style="color:#e74c3c">R$ ${p.custo.toLocaleString('pt-BR')}</span></div>
+            <div class="info-row"><span>Renda p/ Jogo:</span><span style="color:#2ecc71">+R$ ${p.renda.toLocaleString('pt-BR')}</span></div>
+            <div class="info-row"><span>Manutenção:</span><span style="color:#e74c3c">-R$ ${p.manutencao.toLocaleString('pt-BR')}/mês</span></div>
+            <div class="info-row" style="border:none; margin-bottom:10px;">
+                <span>Fama Necessária:</span>
+                <span style="color:${bloqueado ? '#e74c3c' : '#2ecc71'}">${p.reqFans} fãs</span>
+            </div>
+            
+            <button class="btn-action" style="width:100%; padding:12px; ${corBotao}" ${acao}>${textoBotao}</button>
+        </div>`;
+    });
+
+    // 4. Navega para a tela
+    nav('t-home', 't-financas');
+}
+    /* --- SALVA NAS FINANÇAS --- */
+function evoluirEstadio(custo) {
+    if(gameData.dinheiro >= custo) {
+        gameData.dinheiro -= custo; gameData.capacidadeEstadio += 500;
+        alert("Estádio ampliado!"); document.getElementById('lbl-dinheiro').innerText = "R$ " + gameData.dinheiro.toLocaleString('pt-BR');
+        abrirFinancas(); atualizarLabelPreco();
+        salvarJogoAuto(); // <--- SAVE
+    } else alert("Sem dinheiro!");
+}
+
+function assinarPatrocinio(i) {
+    if(gameData.dinheiro >= patrocinios[i].custo) {
+        gameData.dinheiro -= patrocinios[i].custo; patrocinios.forEach(x=>x.ativo=false); patrocinios[i].ativo=true; gameData.torcida += patrocinios[i].fans;
+        alert("Assinado!"); document.getElementById('lbl-dinheiro').innerText = "R$ " + gameData.dinheiro.toLocaleString('pt-BR');
+        abrirFinancas();
+        salvarJogoAuto(); // <--- SAVE
+    } else alert("Sem dinheiro!");
+}
+
+
+    /* --- ELENCO E LIGA --- */
+    function getTeamOvr() {
+        var t=0, sq=schemas[gameData.formacao];
+        for(var i=0;i<11;i++){
+            if(myPlayers[i]){
+                var p=myPlayers[i], val=p.ovr;
+                if(getPosicaoSimplificada(p.pos)!==sq[i]) val=Math.floor(val*0.5);
+                var fatorCansaco = 0.7 + (0.3 * (p.energia/100));
+                t += (val * fatorCansaco);
+            }
+        }
+        return Math.floor(t/11);
+    }
+
+    function gerarElenco() {
+        myPlayers=[];
+        var pNames=["Cleiton","Bocão","Feijão","Zica","Pará","Russo","Alemão","Magrão","Gordinho","Careca","Formiga","Neném","Pezão","Cebola","Boi","Tanque","Veloz","Maestro","Imperador","Pirata"];
+        var pPos=["GOL","LAT","LAT","ZAG","ZAG","MEI","MEI","MEI","ATA","ATA","ATA","GOL","ZAG","MEI","ATA","ATA","LAT","ZAG","MEI","ATA"];
+        for(var i=0;i<20;i++){
+            var base;
+            if(i === 7) { 
+                base = Math.floor(Math.random() * 10) + 50; 
+            } else {
+                base = Math.floor(Math.random()*16)+25; 
+            }
+
+            var st={vel:base, pas:base, chu:base, def:base, fis:base};
+            
+            if(pPos[i]==='ATA') { st.chu+=5; st.vel+=3; }
+            else if(pPos[i]==='MEI') { st.pas+=5; st.vel+=2; }
+            else if(pPos[i]==='LAT') { st.vel+=5; st.fis+=2; }
+            else if(pPos[i]==='ZAG') { st.def+=5; st.fis+=3; }
+            else if(pPos[i]==='GOL') { st.def+=8; st.fis+=2; }
+            
+            for(var k in st) { if(st[k]>99)st[k]=99; if(st[k]<1)st[k]=1; }
+            
+            var realOvr = Math.floor((st.vel+st.pas+st.chu+st.def+st.fis)/5);
+            myPlayers.push({nome:pNames[i]||"Jog "+i, pos:pPos[i], ovr:realOvr, pot: realOvr+5, energia:100, stats:st, treinou: false});
+        }
+    }
+
+    function abrirElenco(ig) {
+        var elGestao = document.getElementById('modal-gestao');
+        if(elGestao) elGestao.style.display = 'none'; 
+        
+        var lbl = document.getElementById('lbl-subs');
+        if(lbl) lbl.innerText = ig ? "Subs: "+subsMade+"/5" : "0/5";
+        nav(ig?'modal-jogo':'t-home', 't-elenco'); selectedPlayer=null; renderElenco(); atualizarForcaTimeTela();
+    }
+    
+    function fecharElenco() { 
+        nav('t-elenco', isInGame?'modal-jogo':'t-home'); 
+        if(isInGame)document.getElementById('modal-pause').style.display='flex'; 
+        else {
+            var eu=leagueData.find(t=>t.isPlayer); 
+            if(eu){eu.ovr=getTeamOvr(); document.getElementById('home-ovr').innerText=eu.ovr;}
+        } 
+    }
+
+    function renderElenco() {
+        var c=document.getElementById('lista-jogadores'); c.innerHTML="";
+        var sq=schemas[gameData.formacao];
+        myPlayers.forEach((p,i)=>{
+            if(i===11)c.innerHTML+=`<div style="text-align:center;padding:10px;color:#aaa;font-size:12px;">RESERVAS</div>`;
+            var cls = p.ovr>=65?"card-gold":p.ovr>=50?"card-silver":"card-bronze";
+            var sel = selectedPlayer===i?"selected":"";
+            var warn = (i<11 && getPosicaoSimplificada(p.pos)!==sq[i]) ? `<small style="color:#e74c3c">(${sq[i]})</small>` : "";
+            var btn = (selectedPlayer!==null && selectedPlayer!==i) ? `<button class="btn-trocar" onclick="realizarTroca(${i},event)">🔄</button>` : "";
+            c.innerHTML+=`<div class="p-card ${cls} ${sel}" onclick="selectedPlayer=${selectedPlayer===i?null:i};renderElenco()">
+                <div style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                    <div><b>${p.nome} (${p.pos})</b> ${warn}</div>
+                    <div style="display:flex;align-items:center;gap:10px;">
+                        <button class="btn-action" style="padding:4px 10px; font-size:10px;" onclick="infoP(${i},event)">VER</button>
+                        ${btn} <b style="font-size:16px;">${p.ovr}</b>
+                    </div>
+                </div>
+                <div class="stamina-container" style="position:absolute;bottom:0;left:0;width:100%;"><div class="stamina-fill" style="width:${p.energia}%"></div></div>
+            </div>`;
+        });
+    }
+    
+    function infoP(i, e) {
+        e.stopPropagation();
+        viewingPlayerIndex = i;
+        var p = myPlayers[i];
+        document.getElementById('det-nome').innerText = p.nome + " (" + p.pos + ")";
+        var h = "";
+        for(var k in p.stats) h += `<div class="stat-row"><span>${k.toUpperCase()}</span><b>${p.stats[k]}</b></div>`;
+        h += `<div class="stat-row" style="margin-top:10px;color:${p.energia<50?'red':'green'}"><span>ENERGIA</span><b>${Math.floor(p.energia)}%</b></div>`;
+        
+        h += `<div class="stat-row" style="margin-top:5px; border-top:1px solid #444; padding-top:5px;"><span>POTENCIAL</span><b style="color:#f1c40f">${p.pot}</b></div>`;
+        
+        document.getElementById('det-stats').innerHTML = h;
+        
+        var btnArea = document.getElementById('det-actions');
+        if(btnArea) {
+            var htmlBtn = "";
+            if(p.energia < 100) {
+                var perdido = 100 - Math.floor(p.energia);
+                var custoRec = perdido * 10; 
+                htmlBtn += `<button class="btn-gold" style="background:#2ecc71; color:black; width:100%; margin-bottom:10px;" onclick="restaurarEnergiaJogador(${i}, ${custoRec})">RECUPERAR (R$ ${custoRec})</button>`;
+            } else {
+                htmlBtn += `<div style="text-align:center; color:#2ecc71; font-weight:bold; margin-bottom:10px;">ENERGIA MÁXIMA</div>`;
+            }
+            btnArea.innerHTML = htmlBtn;
+        }
+        
+        var sellArea = document.getElementById('area-venda');
+        var sellVal = Math.floor(calcularPreco(p.ovr) * 0.6);
+        
+        if(sellArea) {
+            sellArea.innerHTML = `
+                <div style="font-size:12px; color:#aaa; text-align:center; margin-bottom:5px;">Valor de Mercado: R$ ${calcularPreco(p.ovr).toLocaleString('pt-BR')}</div>
+                <button class="btn-gold" style="background:#e74c3c; color:white; width:100%;" onclick="venderJogador(${i})">VENDER (R$ ${sellVal.toLocaleString('pt-BR')})</button>
+            `;
+        }
+        document.getElementById('modal-detalhes').style.display = 'flex';
+    }
+    
+    function restaurarEnergiaJogador(i, custo) {
+        if(gameData.dinheiro >= custo) {
+            gameData.dinheiro -= custo;
+            myPlayers[i].energia = 100;
+            alert("Energia restaurada!");
+            document.getElementById('lbl-dinheiro').innerText = "R$ " + gameData.dinheiro.toLocaleString('pt-BR');
+            document.getElementById('modal-detalhes').style.display = 'none';
+            renderElenco();
+        } else alert("Dinheiro insuficiente!");
+    }
+
+    function realizarTroca(tg, e) {
+        e.stopPropagation();
+        if(isInGame && !isPaused) { alert("PAUSE!"); return; }
+        if(isInGame && (selectedPlayer<11)!==(tg<11)) { if(subsMade>=MAX_SUBS)return alert("Max Subs!"); subsMade++; }
+        var t=myPlayers[selectedPlayer]; myPlayers[selectedPlayer]=myPlayers[tg]; myPlayers[tg]=t;
+        selectedPlayer=null; renderElenco(); atualizarForcaTimeTela();
+    }
+    
+    function atualizarForcaTimeTela() { document.getElementById('lbl-team-strength').innerText="Força: "+getTeamOvr(); }
+    function mudarFormacao() { gameData.formacao=document.getElementById('sel-formacao').value; atualizarForcaTimeTela(); renderElenco(); }
+
+    /* --- FUNÇÃO GERAR LIGA (COM NOMES "GENÉRICOS" / APELIDOS) --- */
+function gerarLiga() {
+    // Se a liga já existe e não foi resetada, apenas atualiza
+    if(leagueData.length > 0) { atualizarRodada(); return; }
+    
+    // --- LISTAS DE NOMES POR NÍVEL (PARÓDIA/APELIDOS) ---
+    
+    // Nível 1: Várzea (Nomes Engraçados)
+    var nomesVarzea = ["Unidos da Vila", "Tabajara FC", "Real Matismo", "Inter de Limão", "Copo Cheio", "Vila Nova", "Canarinhos", "Biqueira FC", "Poeira FC", "100 Compromisso", "Amigos do Zé", "Barra Funda", "Juve da Quebrada", "Nacional B", "Fúria Jovem", "Estrela do Norte", "Gaviões da Várzea", "União St. Amaro", "Largados FC"];
+    
+    // Nível 2: Acesso (Baseado em Série B - Mascotes/Cores)
+    var nomesAcesso = ["Ponte Alvinegra", "Bugre FC", "Vovô Ceará", "Leão da Ilha", "Leão da Barra", "Esmeraldino", "Coxa Branca", "Leão da Ressacada", "Indio Condá", "Tigre Criciuma", "Juve do Sul", "Dragão Goiano", "Tigre da Vila", "Novorizonte", "Mirassol FC", "Tubarão", "Galo da Praia", "Bolívia Querida", "Galo de Itu"];
+    
+    // Nível 3+: Elite (Baseado nos Gigantes - Apelidos Clássicos)
+    var nomesElite = ["Mengão", "Verdão", "Tricolor Pta", "Coringão", "Gigante da Colina", "Imortal Tricolor", "Colorado", "Raposa Celeste", "Galo Mineiro", "Peixe FC", "Estrela Solitária", "Tricolor Carioca", "Furacão", "Massa Bruta", "Tricolor de Aço", "Leão do Pici", "Dourado", "Pantera", "Coelho MG"];
+
+    // Seleciona a lista baseada no nível atual
+    var listaNomes;
+    if (gameData.nivelLiga === 1) {
+        listaNomes = nomesVarzea;
+    } else if (gameData.nivelLiga === 2) {
+        listaNomes = nomesAcesso;
+    } else {
+        listaNomes = nomesElite; // Do nível 3 pra cima, joga com a Elite
+    }
+    
+    // Inicializa a liga com SEU time
+    leagueData = [{id:0, nome:gameData.nomeTime, ovr:getTeamOvr(), pts:0, v:0, gp:0, isPlayer:true}];
+    
+    // Mistura os nomes para não ser sempre a mesma ordem
+    listaNomes.sort(() => Math.random() - 0.5);
+    
+    // --- DIFICULDADE PROGRESSIVA ---
+    // Nível 1: Força 30-45
+    // Nível 2: Força 55-70
+    // Nível 3: Força 80-95
+    var baseDif = (gameData.nivelLiga - 1) * 25; 
+    var minOvr = 30 + baseDif; 
+    var maxOvr = 45 + baseDif; 
+
+    // Cria os 19 adversários
+    for(var i=0; i<19; i++) {
+        var ovrCpu = Math.floor(Math.random() * (maxOvr - minOvr + 1)) + minOvr;
+        if(ovrCpu > 99) ovrCpu = 99; // Limite máximo
+        
+        // Garante que não falte nome se a lista for pequena
+        var nomeTime = listaNomes[i] || "Adversário " + (i+1);
+        
+        leagueData.push({id:i+1, nome:nomeTime, ovr:ovrCpu, pts:0, v:0, gp:0, isPlayer:false});
+    }
+
+    // --- GERA O CALENDÁRIO (38 RODADAS) ---
+    fullSchedule = [];
+    var teams = [...leagueData]; 
+    var n = teams.length;
+    var rounds = n - 1; 
+    var perRound = n / 2;
+
+    // 1º Turno
+    var turno1 = [];
+    for(var r=0; r<rounds; r++){
+        var rodada = [];
+        for(var i=0; i<perRound; i++) {
+            rodada.push({t1:teams[i].id, t2:teams[n-1-i].id, played:false});
+        }
+        turno1.push(rodada);
+        teams.splice(1, 0, teams.pop());
+    }
+
+    // 2º Turno (Returno)
+    var turno2 = [];
+    turno1.forEach(r => {
+        var rodadaInvertida = r.map(jogo => {
+            return {t1: jogo.t2, t2: jogo.t1, played:false};
+        });
+        turno2.push(rodadaInvertida);
+    });
+
+    fullSchedule = [...turno1, ...turno2];
+    
+    // Atualiza a tela
+    atualizarRodada();
+}
+
+
+    /* --- FUNÇÃO ATUALIZAR RODADA (PRÊMIOS ALTOS + FIM DE TEMPORADA) --- */
+function atualizarRodada() {
+    roundFinished = false;
+    var eu = leagueData.find(t => t.isPlayer);
+    
+    if (eu) {
+        eu.ovr = getTeamOvr();
+        document.getElementById('home-ovr').innerText = eu.ovr;
+    }
+
+    // Ordena tabela
+    leagueData.sort((a, b) => b.pts - a.pts || b.v - a.v || b.gp - a.gp);
+
+    var tb = document.getElementById('corpo-tabela');
+    tb.innerHTML = "";
+    leagueData.forEach((t, i) => {
+        var colorClass = "";
+        if (i < 4) colorClass = "style='color:#2ecc71; font-weight:bold;'"; // G4
+        if (i >= 16) colorClass = "style='color:#e74c3c; font-weight:bold;'"; // Z4
+        
+        tb.innerHTML += `<tr class="${t.isPlayer?'row-player':''}">
+            <td ${colorClass}>${i+1}</td>
+            <td style="text-align:left">${t.nome} <small style="color:#aaa">(${t.ovr})</small></td>
+            <td>${t.pts}</td><td>${t.v}</td><td>${t.gp-0}</td><td>${t.gp}</td>
+        </tr>`;
+    });
+
+    // --- FIM DA TEMPORADA ---
+    if (gameData.rodada > fullSchedule.length) {
+        var pos = leagueData.findIndex(t => t.isPlayer) + 1;
+        var titulo = "", mensagem = "", cor = "", emoji = "";
+
+        if (pos === 1) {
+            // CAMPEÃO: R$ 100.000 (Como era antes)
+            titulo = "🏆 É CAMPEÃO!!! 🏆";
+            mensagem = "Parabéns! O título rendeu R$ 100.000 de premiação!";
+            cor = "#f1c40f"; emoji = "🥇";
+            safePlay('gol'); 
+            gameData.dinheiro += 100000; 
+            
+        } else if (pos <= 4) {
+            // ACESSO: R$ 50.000 (Como era antes)
+            titulo = "SUBIU DE DIVISÃO! 🚀";
+            mensagem = "Vaga garantida na elite! Prêmio de acesso: R$ 50.000!";
+            cor = "#2ecc71"; emoji = "😎";
+            safePlay('apito'); 
+            gameData.dinheiro += 50000; 
+            
+        } else if (pos >= 17) {
+            titulo = "REBAIXADO... 😭";
+            mensagem = "A torcida protesta. Caímos de divisão.";
+            cor = "#e74c3c"; emoji = "📉";
+            gameData.torcida = Math.max(0, gameData.torcida - 50);
+            
+        } else {
+            titulo = "FIM DE TEMPORADA";
+            mensagem = "Ficamos no meio da tabela. Temporada regular.";
+            cor = "#aaa"; emoji = "😐";
+        }
+
+        document.getElementById('modal-fim-temporada').style.display = 'flex';
+        document.querySelector('#modal-fim-temporada h2').innerText = titulo;
+        document.querySelector('#modal-fim-temporada h2').style.color = cor;
+        document.getElementById('temp-msg').innerText = mensagem;
+        document.getElementById('temp-pos').innerHTML = `<span style="font-size:40px">${emoji}</span><br>${pos}º LUGAR`;
+        document.getElementById('temp-pos').style.color = cor;
+        document.getElementById('lbl-dinheiro').innerText = "R$ " + gameData.dinheiro.toLocaleString('pt-BR');
+
+        return; 
+    }
+
+    // --- PREPARA PRÓXIMO JOGO ---
+    var matches = fullSchedule[gameData.rodada - 1];
+    myMatchReference = matches.find(m => {
+        var t1 = leagueData.find(x => x.id === m.t1);
+        var t2 = leagueData.find(x => x.id === m.t2);
+        return t1.isPlayer || t2.isPlayer;
+    });
+
+    var t1 = leagueData.find(t => t.id === myMatchReference.t1);
+    var t2 = leagueData.find(t => t.id === myMatchReference.t2);
+    var op = t1.isPlayer ? t2 : t1;
+    opponentIndex = leagueData.indexOf(op);
+
+    currentRoundMatches = matches.filter(m => m !== myMatchReference).map(m => {
+        var tm1 = leagueData.find(x => x.id === m.t1);
+        var tm2 = leagueData.find(x => x.id === m.t2);
+        return { t1: tm1, t2: tm2, matchRef: m, g1: 0, g2: 0 };
+    });
+
+    document.getElementById('rodada-atual').innerText = gameData.rodada;
+    document.getElementById('home-name').innerText = gameData.nomeTime.substring(0, 3).toUpperCase();
+    if (eu) document.getElementById('home-ovr').innerText = eu.ovr;
+    document.getElementById('away-name').innerText = op.nome.substring(0, 3).toUpperCase();
+    document.getElementById('away-ovr').innerText = op.ovr;
+    document.getElementById('info-torcida').innerText = (gameData.torcida + (eu ? eu.pts * 10 : 0)) + " fiéis";
+    document.getElementById('lbl-dinheiro').innerText = "R$ " + gameData.dinheiro.toLocaleString('pt-BR');
+
+    document.getElementById('lbl-fase').innerText = determinarFase();
+    document.getElementById('lbl-ciclo').innerText = gameData.cicloPagamento;
+    document.getElementById('bar-salario').style.width = (gameData.cicloPagamento / 4 * 100) + "%";
+    document.getElementById('alert-pagamento').style.display = gameData.cicloPagamento === 4 ? 'block' : 'none';
+    atualizarLabelPreco();
+}
+
+    /* --- GAME ENGINE --- */
+    /* --- COLE ISTO NO LUGAR DA FUNÇÃO iniciarJogo ANTIGA --- */
+function iniciarJogo() {
+    // PAUSA A MÚSICA DO MENU
+    var musica = document.getElementById('musicaFundo');
+    if(musica) musica.pause();
+
+    // ... (o resto do código continua igual) ...
+    // 1. Destrava o áudio no celular (Hack)
+    ['sfx-apito', 'sfx-torcida', 'sfx-gol'].forEach(id => {
+        var el = document.getElementById(id);
+        if(el) { 
+            el.muted = true; 
+            el.play().then(()=>{ el.pause(); el.currentTime=0; el.muted=false; }).catch(e=>{}); 
+        }
+    });
+
+    // 2. Prepara a tela do jogo
+    nav('t-home', 'modal-jogo'); 
+    tempo = 0; pHome = 0; pAway = 0; homeRed = 0; awayRed = 0; subsMade = 0;
+    isPaused = false; isInGame = true; isHalftime = false;
+    
+    document.getElementById('tempo-jogo').innerText = "0"; 
+    document.getElementById('placar-casa').innerText = "0"; 
+    document.getElementById('placar-fora').innerText = "0"; 
+    document.getElementById('narracao-feed').innerHTML = ""; 
+    document.getElementById('btn-fim-jogo').style.display = 'none';
+    
+    document.getElementById('live-home').innerText = gameData.nomeTime; 
+    document.getElementById('live-away').innerText = leagueData[opponentIndex].nome;
+    
+    // 3. TOCA O SOM (AQUI É O PASSO 2 QUE VOCÊ QUERIA)
+    
+    // Toca o Apito imediatamente
+    safePlay('apito');
+            var apito = document.getElementById('sfx-apito');
+    
+    // Espera um pouquinho (800ms) e liga a Torcida em loop
+    setTimeout(function() {
+        var torcida = document.getElementById('sfx-torcida');
+        if(torcida) { 
+            torcida.volume = 0.5; // Volume 50% para não ficar muito alto
+            torcida.loop = true;  // Faz o som repetir sem parar
+            torcida.play().catch(e => console.log("Torcida não iniciou")); 
+        }
+    }, 800);
+    
+    gameLoop();
+}
+
+    function gameLoop() {
+        if(intervalGame)clearInterval(intervalGame);
+        intervalGame=setInterval(()=>{
+            if(isPaused)return;
+            tempo++; document.getElementById('tempo-jogo').innerText=tempo;
+            processarMinuto();
+            if(tempo===45 && !isHalftime) pausarParaIntervalo();
+            if(tempo>=90) encerrarGameLoop();
+        }, (config.duracao*60*1000)/90);
+    }
+    
+/* --- VERSÃO COM O SOM DE GOL CORRIGIDO (4 Segundos) --- */
+function processarMinuto() {
+    // 1. FREQUÊNCIA DE LANCES (Baseado na Tática)
+    var chanceLance = (taticaAtual === 'atk') ? 0.25 : (taticaAtual === 'def') ? 0.08 : 0.15;
+    
+    // --- NARRADOR FALA ---
+    if(Math.random() > chanceLance) {
+        if(Math.random() < 0.50) { 
+            var frase = frasesFlavor[Math.floor(Math.random() * frasesFlavor.length)];
+            // Adiciona variedade baseada na tática
+            if(taticaAtual === 'def' && Math.random() < 0.4) frase = "🛡️ Ônibus na frente da área! Ninguém passa.";
+            if(taticaAtual === 'atk' && Math.random() < 0.4) frase = "⚔️ Pressão total no ataque!";
+            msg(frase, "neutral");
+        }
+        return; 
+    }
+    
+    // --- DADOS DOS TIMES ---
+    var eu = leagueData.find(t => t.isPlayer);
+    var cpu = leagueData[opponentIndex];
+    
+    // Força Base (OVR)
+    var myStr = getTeamOvr() - (homeRed * 20); 
+    var cpuStr = cpu.ovr - (awayRed * 20);
+    var chancePosse = 0.5;
+
+    // Ajustes Táticos
+    if(taticaAtual === 'def') { myStr += 15; chancePosse = 0.20; } 
+    else if(taticaAtual === 'cnt') { myStr += 7; chancePosse = 0.35; } 
+    else if(taticaAtual === 'pos') { chancePosse = 0.65; } 
+    else if(taticaAtual === 'atk') { myStr += 5; cpuStr += 15; chancePosse = 0.55; }
+
+    var diff = myStr - cpuStr;
+    var chanceGolEu = 0.30 + (diff * 0.005);
+    var chanceGolCpu = 0.30 - (diff * 0.005);
+    if(taticaAtual === 'def') chanceGolEu = 0.05; 
+
+    var rnd = Math.random();
+    
+    // --- RESOLUÇÃO DO LANCE ---
+    if(rnd < 0.45) { // É UM CHUTE A GOL
+        if(Math.random() < chancePosse) {
+            // MEU ATAQUE
+            if(Math.random() < chanceGolEu) {
+                pHome++; animarGol('home'); 
+                
+                // --- AQUI ESTÁ A CORREÇÃO DO SOM ---
+                safePlay('gol'); 
+                setTimeout(function() { stopSound('gol'); }, 4000); // Corta o som em 4 segundos
+                // ------------------------------------
+
+                // Roleta do Artilheiro
+                var candidatos = []; var pesoTotal = 0;
+                for(var i=0; i<11; i++) {
+                    var p = myPlayers[i];
+                    var peso = p.stats.chu;
+                    if(p.pos === 'ATA') peso *= 12;
+                    else if(p.pos === 'MEI') peso *= 5;
+                    else if(p.pos.includes('LAT') || p.pos === 'ALA') peso *= 2;
+                    else if(p.pos.includes('ZAG') || p.pos === 'DEF') peso *= 0.5;
+                    else if(p.pos === 'GOL') peso = 0;
+                    candidatos.push({idx: i, pesoAcumulado: pesoTotal + peso});
+                    pesoTotal += peso;
+                }
+                var roleta = Math.random() * pesoTotal;
+                var autor = myPlayers[candidatos.find(c => c.pesoAcumulado >= roleta).idx];
+
+                msg("⚽ GOOOL DO " + autor.nome.toUpperCase() + " (" + autor.pos + ")!", "gol");
+                document.getElementById('placar-casa').innerText=pHome; 
+            } else {
+                var erros = ["Pra fora!", "Na trave!", "Goleiro pegou.", "Chutou mal...", "Isolou!"];
+                msg(erros[Math.floor(Math.random()*erros.length)], "neutral");
+            }
+        } else {
+            // ATAQUE DELES
+            if(Math.random() < chanceGolCpu) {
+                pAway++; animarGol('away'); 
+                msg("GOL DO " + cpu.nome.toUpperCase() + "...", "red");
+                document.getElementById('placar-fora').innerText=pAway; 
+                
+                // --- SOM CORRIGIDO AQUI TAMBÉM ---
+                safePlay('gol');
+                setTimeout(function() { stopSound('gol'); }, 4000); // Corta o som em 4 segundos
+                // ---------------------------------
+
+            } else {
+                var defesas = ["Uhh! Passou perto.", "Goleirão salvou!", "Zaga cortou.", "Pegou na orelha da bola."];
+                msg(defesas[Math.floor(Math.random()*defesas.length)], "neutral");
+            }
+        }
+    } else if (rnd > 0.96) {
+        // CARTÕES
+        if(Math.random() > 0.5) {
+            msg("🟨 Cartão Amarelo para nós.", "yellow");
+            var chanceRed = (taticaAtual === 'atk') ? 0.08 : 0.02;
+            if(Math.random() < chanceRed){ homeRed++; msg("🟥 EXPULSO! Estamos com um a menos.", "red"); }
+        } else {
+            msg("🟨 Amarelo pra eles.", "neutral");
+            if(Math.random() < 0.03){ awayRed++; msg("🟥 Vermelho pra eles!", "green"); }
+        }
+    }
+}
+
+
+
+    function msg(t, type) { var d=document.createElement('div'); d.className="msg-narracao msg-"+type; d.innerText=tempo+"' "+t; document.getElementById('narracao-feed').prepend(d); }
+    function animarGol(s) { var el=document.getElementById(s==='home'?'placar-casa':'placar-fora'); el.classList.remove('gol-anim'); void el.offsetWidth; el.classList.add('gol-anim'); }
+    function pausarJogo() { isPaused=true; stopSound('torcida'); document.getElementById('modal-pause').style.display='flex'; }
+    function continuarJogo() { document.getElementById('modal-pause').style.display='none'; isPaused=false; safePlay('torcida'); }
+    function abrirSubstituicao() { isPaused=true; abrirElenco(true); }
+    function pausarParaIntervalo() { isPaused=true; isHalftime=true; safePlay('apito'); document.getElementById('modal-intervalo').style.display='flex'; }
+    function pularIntervalo() { document.getElementById('modal-intervalo').style.display='none'; safePlay('apito'); isPaused=false; }
+    function encerrarGameLoop() { clearInterval(intervalGame); stopSound('torcida'); safePlay('apito'); document.getElementById('btn-fim-jogo').style.display='block'; isInGame=false; }
+
+    /* --- FUNÇÃO CORRIGIDA: SIMULA O SEU JOGO E O DA CPU --- */
+function encerrarPartida() {
+    // 1. ATUALIZA O SEU JOGO (EU vs CPU)
+    var eu = leagueData.find(t => t.isPlayer);
+    var cpu = leagueData[opponentIndex];
+    
+    // Atualiza estatísticas do seu jogo
+    eu.gp += pHome; cpu.gp += pAway; 
+    eu.j++; cpu.j++;
+    
+    // Salva o placar no calendário
+    var t1IsP = leagueData.find(t => t.id === myMatchReference.t1).isPlayer;
+    if(t1IsP){ myMatchReference.g1 = pHome; myMatchReference.g2 = pAway; } 
+    else { myMatchReference.g1 = pAway; myMatchReference.g2 = pHome; }
+    myMatchReference.played = true;
+
+    // Calcula Pontos do seu jogo
+    if(pHome > pAway){ eu.pts += 3; eu.v++; cpu.d++; } 
+    else if(pHome < pAway){ cpu.pts += 3; cpu.v++; eu.d++; } 
+    else { eu.pts++; cpu.pts++; eu.e = (eu.e || 0) + 1; cpu.e = (cpu.e || 0) + 1; }
+
+    // 2. SIMULA OS OUTROS JOGOS DA RODADA (AQUI ESTAVA O ERRO)
+    currentRoundMatches.forEach(m => {
+        // Simula placar baseado no OVR (Força)
+        // Quanto maior a diferença de força, maior a chance de gols
+        var diff = m.t1.ovr - m.t2.ovr;
+        var fatorSorte = Math.floor(Math.random() * 3); // 0, 1 ou 2 gols aleatórios
+        
+        // Gols do Time 1
+        m.g1 = fatorSorte;
+        if(diff > 5) m.g1 += 1; // Time 1 muito mais forte
+        if(diff > 15) m.g1 += 1; // Goleada
+        if(Math.random() > 0.5) m.g1 += 1; // Sorte extra
+
+        // Gols do Time 2
+        m.g2 = fatorSorte;
+        if(diff < -5) m.g2 += 1; // Time 2 muito mais forte
+        if(diff < -15) m.g2 += 1;
+        if(Math.random() > 0.5) m.g2 += 1;
+
+        // Garante que não tenha placar negativo
+        m.g1 = Math.max(0, m.g1);
+        m.g2 = Math.max(0, m.g2);
+
+        // ATUALIZA A TABELA DA CPU
+        m.t1.gp += m.g1; 
+        m.t2.gp += m.g2;
+        m.t1.j++; 
+        m.t2.j++;
+
+        // Quem ganhou?
+        if(m.g1 > m.g2) {
+            m.t1.pts += 3; 
+            m.t1.v++; 
+            m.t2.d++;
+        } else if(m.g2 > m.g1) {
+            m.t2.pts += 3; 
+            m.t2.v++; 
+            m.t1.d++;
+        } else {
+            m.t1.pts += 1; 
+            m.t2.pts += 1;
+            m.t1.e = (m.t1.e || 0) + 1;
+            m.t2.e = (m.t2.e || 0) + 1;
+        }
+
+        // Salva no histórico
+        m.matchRef.g1 = m.g1;
+        m.matchRef.g2 = m.g2;
+        m.matchRef.played = true;
+    });
+
+    // 3. ECONOMIA E TORCIDA (MANTIDA IGUAL)
+    var preco = parseInt(document.getElementById('rng-preco').value) || 30;
+    var publicoPotencial = Math.floor(gameData.torcida * Math.max(0.1, 1 - (preco / tetoAtual))); 
+    var publico = Math.min(publicoPotencial, gameData.capacidadeEstadio); 
+    var renda = publico * preco;
+    var ticketBar = Math.floor(Math.random() * 7) + 2; 
+    var rendaBar = publico * ticketBar;
+    var custoJogo = 1400; 
+    
+    var rendaP = 0, custoP = 0;
+    patrocinios.forEach(p => { if(p.ativo){ rendaP += p.renda; custoP += p.manutencao; }});
+    
+    var folha = calcularFolhaSalarial(), pagou = false, desp = 0;
+    if(gameData.cicloPagamento >= 4){ desp += (folha + custoP); pagou = true; gameData.cicloPagamento = 0; }
+    gameData.cicloPagamento++;
+    
+    var lucro = (renda + rendaBar + rendaP) - (desp + custoJogo); 
+    gameData.dinheiro += lucro;
+    
+    // Torcida muda com resultado
+    var oscTorcida = 0;
+    if(pHome > pAway) oscTorcida = Math.floor(Math.random() * 20) + 30; 
+    else if(pHome == pAway) oscTorcida = 5; 
+    else oscTorcida = -Math.floor(Math.random() * 20) - 10;
+    
+    gameData.torcida = Math.max(10, gameData.torcida + oscTorcida);
+
+    // 4. RECUPERAÇÃO DE ENERGIA
+    myPlayers.forEach((p, idx) => { 
+        p.treinou = false;
+        if(idx < 11) { // Titulares cansam
+            var cansacoBase = Math.floor(Math.random() * 5) + 12; 
+            p.energia -= (cansacoBase - 8); 
+        } else { // Reservas recuperam
+            p.energia += 30; 
+        }
+        if(p.energia < 0) p.energia = 0;
+        if(p.energia > 100) p.energia = 100; 
+    });
+
+    // 5. ATUALIZA O MODAL DE RELATÓRIO
+    document.getElementById('rel-publico').innerText = publico;
+    document.getElementById('rel-renda').innerText = "+ R$ " + (renda + rendaBar).toLocaleString('pt-BR');
+    document.getElementById('rel-patro').innerText = "+ R$ " + rendaP.toLocaleString('pt-BR');
+    
+    var boxDesp = document.getElementById('box-despesas');
+    if(pagou) {
+        boxDesp.style.display = 'block';
+        document.getElementById('rel-salario').innerText = "- R$ " + folha.toLocaleString('pt-BR');
+        document.getElementById('rel-manutencao').innerText = "- R$ " + custoP.toLocaleString('pt-BR');
+    } else { boxDesp.style.display = 'none'; }
+
+    var elTotal = document.getElementById('rel-total'); 
+    elTotal.innerText = (lucro >= 0 ? "+" : "") + "R$ " + lucro.toLocaleString('pt-BR'); 
+    elTotal.style.color = lucro >= 0 ? "#2ecc71" : "#e74c3c";
+    
+    var elFan = document.getElementById('rel-fans-change'); 
+    elFan.innerText = (oscTorcida >= 0 ? "+" : "") + oscTorcida; 
+    elFan.style.color = oscTorcida >= 0 ? "#2ecc71" : "#e74c3c";
+
+    roundFinished = true;
+    
+    // RENOVA MERCADO A CADA 4 JOGOS
+    if(gameData.rodada % 4 === 0) gerarMercado();
+
+    // EXIBE RESULTADO
+    document.getElementById('modal-jogo').style.display = 'none';
+    document.getElementById('modal-relatorio').style.display = 'flex';
+    salvarJogoAuto();
+}
+
+    function fecharRelatorio() { 
+    // --- NOVO: A MÚSICA VOLTA (Volume configurado) ---
+    var musica = document.getElementById('musicaFundo');
+    if(musica) { 
+        musica.volume = config.volMusica; 
+        musica.play().catch(e=>{}); 
+    }
+    // -------------------------------------------------
+
+    document.getElementById('modal-relatorio').style.display='none'; 
+    verRodada(true); 
+}
+    function verRodada(end) {
+        var h=`<div class="rodada-item" style="border:1px solid gold"><span>${gameData.nomeTime}</span> <b>${roundFinished?pHome+' x '+pAway:'? x ?'}</b> <span>${leagueData[opponentIndex].nome}</span></div>`;
+        currentRoundMatches.forEach(m=>h+=`<div class="rodada-item"><span>${m.t1.nome}</span> <b>${roundFinished?m.g1+' x '+m.g2:'- x -'}</b> <span>${m.t2.nome}</span></div>`);
+        document.querySelector('#modal-rodada .detalhes-card').innerHTML=`<h3>RODADA ${gameData.rodada}</h3>${h}<button class="btn-gold" onclick="${end?'avancarRodada()':'nav(\'modal-rodada\',\'t-home\')'}">${end?'PRÓXIMA':'FECHAR'}</button>`;
+        nav(end?'t-home':'t-liga', 'modal-rodada');
+    }
+    
+    function sairJogo() {
+    if(confirm("WO (0x3)?")){
+        // Para o tempo do jogo
+        clearInterval(intervalGame); 
+        isInGame=false; 
+        
+        // Aplica a punição (Lógica antiga mantida)
+        pHome=0; pAway=3; 
+        gameData.torcida=Math.max(0, gameData.torcida-20); 
+        
+        // Finaliza
+        encerrarPartida(); 
+        document.getElementById('modal-pause').style.display='none';
+
+        // --- NOVO: A MÚSICA VOLTA ---
+        var musica = document.getElementById('musicaFundo');
+        if(musica) { 
+            musica.volume = config.volMusica; 
+            musica.play().catch(e=>{}); 
+        }
+        // ----------------------------
+    }
+}
+    /* --- SAVE/LOAD --- */
+    function toggleMenu(e) { e.stopPropagation(); var m=document.getElementById('menu-dropdown'); m.style.display=m.style.display==='flex'?'none':'flex'; }
+    function fecharMenuSeAberto(e) { var m=document.getElementById('menu-dropdown'); if(m.style.display==='flex') m.style.display='none'; }
+    
+    function salvarJogoAuto() { localStorage.setItem(SAVE_KEY, JSON.stringify({g:gameData, l:leagueData, p:myPlayers, s:fullSchedule, li:currentLogoIndex, ls:currentStyle, fc:savedFlagCss, sh: currentShapeCss, pt:patrocinios, mp:marketPlayers, lastAutoRound: lastAutoRound})); }
+    
+    /* --- SISTEMA DE SAVE/LOAD CORRIGIDO --- */
+
+// 1. Salva tudo o que é importante
+function salvarJogoAuto() { 
+    localStorage.setItem(SAVE_KEY, JSON.stringify({
+        g: gameData, 
+        l: leagueData, 
+        p: myPlayers, 
+        s: fullSchedule, 
+        li: currentLogoIndex, 
+        ls: currentStyle, 
+        fc: savedFlagCss, 
+        sh: currentShapeCss, 
+        pt: patrocinios, 
+        mp: marketPlayers, 
+        lastAutoRound: lastAutoRound,
+        tatica: taticaAtual // Salva a tática também
+    })); 
+}
+
+// 2. Carrega e ATUALIZA A TELA (Correção dos 20k e torcida)
+function carregarJogo() {
+    var save = localStorage.getItem(SAVE_KEY);
+    if (!save) {
+        alert("Nenhum jogo salvo encontrado!");
+        return;
+    }
+
+    var d = JSON.parse(save);
+    
+    // Recupera os dados para as variáveis
+    gameData = d.g; 
+    leagueData = d.l; 
+    myPlayers = d.p; 
+    fullSchedule = d.s; 
+    currentLogoIndex = d.li; 
+    currentStyle = d.ls; 
+    savedFlagCss = d.fc; 
+    if (d.sh) currentShapeCss = d.sh; 
+    if (d.pt) patrocinios = d.pt; 
+    if (d.mp) marketPlayers = d.mp; 
+    if (d.lastAutoRound) lastAutoRound = d.lastAutoRound;
+    if (d.tatica) taticaAtual = d.tatica;
+
+    // --- AQUI ESTÁ A CORREÇÃO: ATUALIZA O VISUAL AGORA ---
+    
+    // 1. Dinheiro e Torcida
+    document.getElementById('lbl-dinheiro').innerText = "R$ " + gameData.dinheiro.toLocaleString('pt-BR');
+    document.getElementById('info-torcida').innerText = gameData.torcida + " fiéis";
+    
+    // 2. Escudo e Cores
+    var headFlag = document.getElementById('header-flag');
+    headFlag.setAttribute('style', savedFlagCss); 
+    headFlag.innerText = logos[currentLogoIndex];
+    headFlag.style.borderRadius = currentShapeCss;
+
+    // 3. Informações do Clube
+    document.getElementById('txt-team-name').innerText = gameData.nomeTime;
+    document.getElementById('info-tecnico').innerText = gameData.treinador;
+    document.getElementById('info-liga').innerText = gameData.ligaName;
+    document.getElementById('info-pais').innerText = gameData.pais;
+    document.getElementById('info-estadio').innerText = gameData.estadio;
+    document.getElementById('info-capacidade').innerText = gameData.capacidadeEstadio.toLocaleString('pt-BR');
+    var elRep = document.getElementById('info-reputacao'); 
+    if(elRep) elRep.innerText = gameData.reputacao;
+
+    // 4. Entra no jogo
+    atualizarRodada(); 
+    nav('t-inicio', 't-home');
+    
+    // ... (início da função carregarJogo continua igual) ...
+
+    // 5. Toca a música em vez do apito
+    var musica = document.getElementById('musicaFundo');
+    if(musica) { 
+        musica.volume = 0.3; 
+        musica.play().catch(e => {}); 
+    }
+}
+// 3. Verifica se tem save ao abrir o jogo
+window.onload = () => {
+    // Se existir um save na memória...
+    if (localStorage.getItem(SAVE_KEY)) {
+        var btn = document.querySelector('.btn-start');
+        
+        // Transforma o botão "JOGAR" em "CONTINUAR"
+        btn.innerText = "CONTINUAR";
+        btn.style.background = "#2ecc71"; // Fica verde
+        btn.style.color = "black";
+        btn.style.borderColor = "white";
+        btn.onclick = () => carregarJogo(); // Chama a função corrigida
+
+        // Cria o botão "NOVO JOGO" embaixo (pequeno)
+        var btnNovo = document.createElement('div');
+        btnNovo.innerText = "NOVO JOGO (Apagar Save)";
+        btnNovo.style.marginTop = "15px";
+        btnNovo.style.fontSize = "12px";
+        btnNovo.style.color = "#e74c3c";
+        btnNovo.style.cursor = "pointer";
+        btnNovo.style.textDecoration = "underline";
+        
+        btnNovo.onclick = function() {
+            if(confirm("Isso vai apagar seu time atual e começar do zero. Tem certeza?")) {
+                localStorage.removeItem(SAVE_KEY);
+                location.reload();
+            }
+        };
+        
+        document.getElementById('t-inicio').appendChild(btnNovo);
+    }
+};
+
+    
+    function abrirCalendario(){ viewRound=gameData.rodada; renderCalendar(); nav('t-home','t-calendario'); }
+    function mudarRodadaCal(d){ viewRound+=d; if(viewRound<1)viewRound=1; if(viewRound>fullSchedule.length)viewRound=fullSchedule.length; renderCalendar(); }
+    function renderCalendar(){
+        document.getElementById('cal-rodada-titulo').innerText="RODADA "+viewRound; var l=document.getElementById('lista-calendario'); l.innerHTML="";
+        fullSchedule[viewRound-1].forEach(m=>{
+            var t1=leagueData.find(x=>x.id===m.t1), t2=leagueData.find(x=>x.id===m.t2);
+            l.innerHTML+=`<div style="display:flex;justify-content:space-between;padding:10px;background:#222;margin:5px;border-radius:5px;border:${(t1.isPlayer||t2.isPlayer)?'1px solid gold':'none'}"><div style="width:40%;text-align:right">${t1.nome.substr(0,10)}</div><div style="width:20%;text-align:center">${m.played?m.g1+'x'+m.g2:'vs'}</div><div style="width:40%">${t2.nome.substr(0,10)}</div></div>`;
+        });
+    }
+    /* --- FUNÇÃO CORRIGIDA: LIGA/DESLIGA SOM E CONTROLA VOLUME --- */
+function toggleAudio(){
+    // 1. Inverte a configuração (Liga/Desliga)
+    config.audio = !config.audio;
+    
+    // 2. Atualiza o texto do botão na tela
+    var lbl = document.getElementById('lbl-audio');
+    if(lbl) lbl.innerText = config.audio ? "LIGADO" : "DESLIGADO";
+
+    // 3. Controla a Música de Fundo DE VERDADE
+    var musica = document.getElementById('musicaFundo');
+    if(musica) {
+        if(config.audio) {
+            musica.volume = 0.1; // Volume bem baixinho (10%) para não cobrir a torcida
+            musica.play().catch(e => console.log("Erro ao tocar música"));
+        } else {
+            musica.pause(); // Para a música imediatamente
+        }
+    }
+}
+    /* ========================================================================
+   FUNÇÕES DE CONSERTO E SISTEMA DE EMPRÉSTIMO (ADICIONAR AO FINAL)
+   ======================================================================== */
+
+// 1. FUNÇÃO DE NAVEGAÇÃO (Faz os botões mudarem de tela)
+function nav(idAntiga, idNova) {
+    // Esconde todas as telas para garantir que não fiquem encavaladas
+    var telas = document.querySelectorAll('.tela');
+    telas.forEach(t => t.style.display = 'none');
+    
+    // Esconde todos os modais
+    var modais = document.querySelectorAll('.modal-overlay');
+    modais.forEach(m => m.style.display = 'none');
+
+    // Mostra a tela de destino
+    var destino = document.getElementById(idNova);
+    if(destino) destino.style.display = 'flex';
+}
+
+// 2. MENU DE 3 PONTOS (Faz o menu abrir e fechar)
+function toggleMenu(e) {
+    if(e) e.stopPropagation();
+    var m = document.getElementById('menu-dropdown');
+    m.style.display = (m.style.display === 'flex') ? 'none' : 'flex';
+}
+
+// 3. FUNÇÃO DA CAMISA (Necessária para o Elenco abrir sem erro)
+function getShirtIcon(pos) {
+    var c1 = gameData.corPri || "#ffffff";
+    var c2 = gameData.corSec || "#000000";
+    var badgeColor = (pos === 'GOL') ? '#e67e22' : (pos === 'DEF') ? '#3498db' : (pos === 'MEI') ? '#f1c40f' : '#e74c3c';
+    return `<div class="shirt-icon" style="width:30px; height:30px; background:${c1}; border:2px solid ${c2}; display:inline-flex; justify-content:center; align-items:center; border-radius:4px; margin-right:8px; font-size:10px; color:${c2}; font-weight:bold;">${pos}</div>`;
+}
+
+    // 4. MERCADO COM EMPRÉSTIMO (Adiciona a opção de Alugar)
+    function abrirMercado() {
+        var c = document.getElementById('lista-mercado');
+        c.innerHTML = "";
+        
+        // Atualiza o aviso de quando chegam novos jogadores
+        var proxAtt = 4 - ((gameData.rodada - 1) % 4);
+        var aviso = document.getElementById('aviso-mercado');
+        if(aviso) aviso.innerText = "Novos jogadores em: " + proxAtt + " jogos";
+
+        marketPlayers.forEach((p, i) => {
+            var cls = p.ovr >= 60 ? "card-gold" : p.ovr >= 40 ? "card-silver" : "card-bronze";
+            var rentCost = Math.floor(p.preco * 0.35); // Custo de 35% para alugar
+            var potClass = p.pot >= 80 ? 'pot-high' : p.pot >= 60 ? 'pot-med' : 'pot-low';
+
+            c.innerHTML += `
+            <div class="market-card ${cls}" style="display:block; padding:10px; margin-bottom:10px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <div style="display:flex; align-items:center;">
+                        <div class="ovr-box-market" style="background:#000; color:#f1c40f; padding:5px; border-radius:4px; margin-right:10px;">${p.ovr}</div>
+                        <div>
+                            <b>${p.nome}</b> <small>(${p.pos})</small>
+                            <span class="pot-badge ${potClass}">POT ${p.pot}</span>
+                        </div>
+                    </div>
+                    <div style="text-align:right;">
+                        <div style="color:#f1c40f; font-weight:bold;">R$ ${p.preco.toLocaleString('pt-BR')}</div>
+                    </div>
+                </div>
+                <div style="display:flex; gap:5px; margin-top:10px;">
+                    <button class="btn-action" style="flex:1; background:#2ecc71; color:black; font-weight:bold;" onclick="contratarJogador(${i}, 'buy')">COMPRAR</button>
+                    <button class="btn-action" style="flex:1; background:#3498db; color:white; font-weight:bold;" onclick="contratarJogador(${i}, 'loan')">ALUGAR (R$ ${rentCost})</button>
+                </div>
+            </div>`;
+        });
+        nav('t-home', 't-mercado');
+    } // <--- AQUI ESTAVA O ERRO: Faltava fechar esta chave!
+
+    /* --- SALVA AUTOMATICAMENTE DEPOIS DE CONTRATAR --- */
+function contratarJogador(idx, type) {
+    var p = marketPlayers[idx];
+    var cost = (type === 'loan') ? Math.floor(p.preco * 0.35) : p.preco;
+
+    // Verifica Limite Empréstimo
+    if (type === 'loan') {
+        var qtdEmprestados = myPlayers.filter(jog => jog.loanLeft > 0).length;
+        if (qtdEmprestados >= 5) {
+            alert("⚠️ Limite atingido! Você já tem 5 jogadores emprestados.");
+            return; 
+        }
+    }
+
+    if (gameData.dinheiro >= cost) {
+        if (myPlayers.length >= 25) { alert("Elenco cheio (Máx 25)!"); return; }
+        
+        gameData.dinheiro -= cost;
+        var newP = JSON.parse(JSON.stringify(p)); 
+        
+        if (type === 'loan') {
+            newP.loanLeft = 10; 
+            newP.preco = 0; 
+            alert("JOGADOR ALUGADO! (Contrato: 10 jogos)");
+        } else {
+            alert("JOGADOR COMPRADO EM DEFINITIVO!");
+        }
+        
+        myPlayers.push(newP);
+        marketPlayers.splice(idx, 1); 
+        
+        document.getElementById('lbl-dinheiro').innerText = "R$ " + gameData.dinheiro.toLocaleString('pt-BR');
+        abrirMercado(); 
+        salvarJogoAuto(); // <--- ADICIONEI AQUI (SALVA O GASTO)
+    } else {
+        alert("Dinheiro insuficiente!");
+    }
+}
+
+
+    /* --- FUNÇÕES DE SOM --- */
+    function safePlay(id) { 
+        if(config.audio){ 
+            try {
+                var el = document.getElementById("sfx-" + id);
+                if(el) {
+                    el.currentTime = 0; 
+                    el.volume = 1.0;    
+                    var playPromise = el.play();
+                    if (playPromise !== undefined) {
+                        playPromise.catch(error => { console.log("Áudio bloqueado."); });
+                    }
+                }
+            } catch(e){ console.log("Erro de áudio"); } 
+        } 
+    }
+
+    function stopSound(id) { 
+        var el = document.getElementById("sfx-" + id); 
+        if(el){ el.pause(); el.currentTime = 0; } 
+    }
+
+    function toggleAudio(){
+        config.audio = !config.audio;
+        var lbl = document.getElementById('lbl-audio');
+        if(lbl) lbl.innerText = config.audio ? "ON" : "OFF";
+    }
+
+    function setDuracao(m){
+        config.duracao = m;
+        document.querySelectorAll('.btn-config').forEach(b => b.classList.remove('active'));
+        if(m===0.5) document.getElementById('btn-05min').classList.add('active');
+        if(m===1) document.getElementById('btn-1min').classList.add('active');
+        if(m===2) document.getElementById('btn-2min').classList.add('active');
+    }
+
+/* --- FUNÇÃO QUE FALTOU: AVANÇAR PARA A PRÓXIMA RODADA --- */
+function avancarRodada() {
+    gameData.rodada++;           // Aumenta o número da rodada
+    atualizarRodada();           // Recalcula tabela e próximo jogo
+    checarEventoAleatorio();     // Tenta gerar um evento (15% chance)
+    salvarJogoAuto();            // Salva o progresso
+    nav('modal-rodada', 't-home'); // Volta para a tela inicial
+}
+/* ========================================================================
+   KIT DE CORREÇÃO FINAL (TÁTICAS + MENSAGENS + AVANÇAR)
+   Colar isso no final do arquivo resolve os botões e as falas.
+   ======================================================================== */
+
+// 1. VARIÁVEL DE CONTROLE
+var taticaAtual = "normal"; 
+
+// 2. FUNÇÃO DOS BOTÕES DE TÁTICA (Que estava faltando)
+function mudarTatica(tipo) {
+    taticaAtual = tipo;
+    var lista = ['def', 'cnt', 'nor', 'pos', 'atk'];
+    
+    // Reseta cores dos botões
+    lista.forEach(t => {
+        var btn = document.getElementById('btn-tac-' + t);
+        if(btn) { btn.style.background = "#2c2c2c"; btn.style.color = "white"; }
+    });
+
+    // Pinta o botão selecionado e narra a mudança
+    var btnSel = document.getElementById('btn-tac-' + tipo);
+    if(btnSel) {
+        if(tipo === 'def') { 
+            btnSel.style.background = "#3498db"; 
+            msg("🛡️ Técnico pede: FECHA A CASINHA!", "neutral"); 
+        } else if(tipo === 'cnt') { 
+            btnSel.style.background = "#9b59b6"; 
+            msg("⚡ Tática: Jogar no erro deles (Contra-Ataque)!", "neutral"); 
+        } else if(tipo === 'pos') { 
+            btnSel.style.background = "#2ecc71"; 
+            msg("⚽ Ordem: Valorizar a posse de bola.", "neutral"); 
+        } else if(tipo === 'atk') { 
+            btnSel.style.background = "#e74c3c"; 
+            msg("⚔️ Tática: PRESSÃO TOTAL NO ATAQUE!", "neutral"); 
+        } else { 
+            btnSel.style.background = "#f1c40f"; 
+            btnSel.style.color = "black"; 
+            msg("⚖️ Time volta à formação equilibrada.", "neutral"); 
+        }
+    }
+}
+
+// 3. FUNÇÃO DE AVANÇAR RODADA (Para o botão 'Próxima' funcionar)
+function avancarRodada() {
+    gameData.rodada++; 
+    atualizarRodada(); 
+    checarEventoAleatorio();
+    salvarJogoAuto();
+    nav('modal-rodada', 't-home');
+}
+
+// 4. FUNÇÕES DE NARRAÇÃO E VISUAL (Essenciais para as falas aparecerem)
+function msg(t, type) { 
+    var d = document.createElement('div'); 
+    d.className = "msg-narracao msg-" + type; 
+    d.innerText = tempo + "' " + t; 
+    
+    var feed = document.getElementById('narracao-feed');
+    if(feed) feed.prepend(d); 
+}
+
+function animarGol(s) { 
+    var el = document.getElementById(s === 'home' ? 'placar-casa' : 'placar-fora'); 
+    if(el) {
+        el.classList.remove('gol-anim'); 
+        void el.offsetWidth; 
+        el.classList.add('gol-anim'); 
+    }
+}
+function mudarVolume(tipo, val) {
+    val = parseFloat(val); // Garante que é número
+    if(tipo === 'musica') {
+        config.volMusica = val;
+        var m = document.getElementById('musicaFundo');
+        if(m) m.volume = val;
+    } else {
+        config.volSfx = val;
+        // Atualiza a torcida na hora se ela estiver tocando
+        var t = document.getElementById('sfx-torcida');
+        if(t) t.volume = val;
+    }
+}
+</script>
