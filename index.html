@@ -19,6 +19,41 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>S7 Várzea League</title>
 <style>
+    /* --- ESTILOS GERAIS --- */
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, sans-serif; user-select: none; -webkit-tap-highlight-color: transparent; }
+    :root {
+    /* -- AS CORES NOVAS (Estilo Gamer/Dark) -- */
+    --fundo-geral: #121212;       /* Preto fosco */
+    --fundo-card: #1E1E1E;        /* Cinza chumbo */
+    --texto-principal: #E0E0E0;   /* Branco gelo */
+    --verde-grana: #00C853;       /* Verde Dinheiro */
+    --amarelo-alerta: #FFD600;    /* Amarelo Aviso */
+}
+
+body {
+ <div id="menu-online" style="background: black; color: white; padding: 20px; text-align: center;">
+    <h2>⚽ S7 VÁRZEA ONLINE</h2>
+    <p>Digite o nome da sala (Ex: X1DOSCRIA)</p>
+    
+    <input type="text" id="nome-sala" placeholder="Nome da Sala..." style="padding: 10px;">
+    <br><br>
+    
+    <button onclick="criarSala()">CRIAR SALA (Sou o Dono)</button>
+    <button onclick="entrarSala()">ENTRAR (Sou o Desafiante)</button>
+    
+    <hr>
+    <div id="hud-online" style="display:none; background: #222; border: 2px solid yellow; padding: 10px;">
+        <h3>🔴 ADVERSÁRIO</h3>
+        <p>Formação: <span id="tatica-inimigo" style="color: yellow; font-weight: bold;">???</span></p>
+    </div>
+</div>
+
+  background-color: var(--fundo-geral); /* Troca o fundo branco pelo preto */
+    color: var(--texto-principal);        /* Troca letra preta por branca */
+    font-family: sans-serif;
+    margin: 0;
+    padding: 0;
+}
 
     /* ANIMAÇÕES */
     @keyframes goalPulse { 0% { transform: scale(1); color: white; } 50% { transform: scale(1.5); color: #2ecc71; text-shadow: 0 0 20px #2ecc71; } 100% { transform: scale(1); color: white; } }
@@ -301,8 +336,7 @@ header {
         <div class="menu-grid">
             <div class="menu-btn" onclick="abrirElenco(false)"><div style="font-size:30px;">👕</div><div style="font-weight:bold; margin-top:5px;">ELENCO</div></div>
             <div class="menu-btn" onclick="abrirSelecionarJogadorParaTreino()"><div style="font-size:30px;">💪</div><div style="font-weight:bold; margin-top:5px;">TREINO</div></div>
-            </button>
-
+            
             <div class="menu-btn" onclick="abrirMercado()"><div style="font-size:30px;">🛒</div><div style="font-weight:bold; margin-top:5px;">MERCADO</div></div>
             <div class="menu-btn" onclick="nav('t-home','t-liga')"><div style="font-size:30px;">🏆</div><div style="font-weight:bold; margin-top:5px;">TABELA</div></div>
             <div class="menu-btn" onclick="abrirFinancas()"><div style="font-size:30px;">💰</div><div style="font-weight:bold; margin-top:5px;">CLUBE</div></div>
@@ -2495,9 +2529,77 @@ function mudarVolume(tipo, val) {
         if(t) t.volume = val;
     }
 }
+// === CÓDIGO DO MULTIPLAYER (COLE NO FINAL DO SCRIPT) ===
+
+var minhaSala = "";
+var souDono = false;
+
+// 1. Função para CRIAR a sala (Você manda o convite)
+function criarSala() {
+    var nomeSala = document.getElementById("nome-sala").value;
+    if(nomeSala == "") { alert("Digite um nome pra sala!"); return; }
+
+    minhaSala = nomeSala;
+    souDono = true;
+
+    // Salva no Firebase que a sala existe e sua tática inicial é 'Normal'
+    firebase.database().ref("partidas/" + minhaSala).set({
+        jogador1_tatica: "Normal",
+        jogador2_tatica: "Aguardando..."
+    });
+
+    alert("Sala " + nomeSala + " criada! Mande o nome pro seu amigo.");
+    iniciarModoOnline();
+}
+
+// 2. Função para ENTRAR na sala (Seu amigo aceita o convite)
+function entrarSala() {
+    var nomeSala = document.getElementById("nome-sala").value;
+    if(nomeSala == "") { alert("Digite o nome da sala pra entrar!"); return; }
+
+    minhaSala = nomeSala;
+    souDono = false; // Eu sou o desafiante
+
+    // Avisa o Firebase que eu cheguei
+    firebase.database().ref("partidas/" + minhaSala).update({
+        jogador2_tatica: "Normal"
+    });
+
+    alert("Entrou na sala " + nomeSala + "! Bora pro X1.");
+    iniciarModoOnline();
+}
+
+// 3. O ESPIÃO (Isso atualiza a tela quando o inimigo mexe)
+function iniciarModoOnline() {
+    // Mostra aquele placar lá em cima
+    document.getElementById("hud-online").style.display = "block";
+
+    // O Espião começa a trabalhar:
+    firebase.database().ref("partidas/" + minhaSala).on('value', function(snapshot) {
+        var dados = snapshot.val();
+        
+        // Se eu sou o Dono (Player 1), quero ver a tática do Player 2
+        if (souDono) {
+            document.getElementById("tatica-inimigo").innerText = dados.jogador2_tatica;
+        } 
+        // Se eu sou o Desafiante (Player 2), quero ver a tática do Player 1
+        else {
+            document.getElementById("tatica-inimigo").innerText = dados.jogador1_tatica;
+        }
+    });
+}
+
+// 4. Mudar minha tática (Você chama essa função quando clica nos botões do jogo)
+function mudarMinhaTatica(novaTatica) {
+    // Exemplo: mudarMinhaTatica("Ataque Total")
+    
+    if (minhaSala != "") { // Só envia se estiver online
+        var campoParaAtualizar = souDono ? "jogador1_tatica" : "jogador2_tatica";
+        
+        firebase.database().ref("partidas/" + minhaSala).update({
+            [campoParaAtualizar]: novaTatica
+        });
+    }
+}
 
 </script>
-
-
-
-
